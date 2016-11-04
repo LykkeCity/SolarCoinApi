@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson.JsonRpc;
 
-namespace ConsoleApp1
+namespace CashOutTester
 {
     public class Program
     {
@@ -64,4 +64,3 @@ namespace ConsoleApp1
         }
     }
 }
-//5201320fce1eec5a67bf6d074bbdf57474451a66a73b28ec5e7bbb755f5c0e3c
