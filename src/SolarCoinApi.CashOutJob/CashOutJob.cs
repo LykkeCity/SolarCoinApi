@@ -15,15 +15,14 @@ namespace SolarCoinApi.CashOutJob
 {
     public class CashOutJob : TimerPeriod
     {
-        private INoSQLTableStorage<HotWalletUsableTxEntity> _usableTxes;
         private AzureQueueExt _queue;
-        private HotWallet _hotWallet;
         private IJsonRpcClient _rpcClient;
-        private decimal TX_PRICE = 0.001m;
 
-        public CashOutJob(string componentName, int periodMs, ILog log)
+        public CashOutJob(string componentName, int periodMs, ILog log, AzureQueueExt queue, IJsonRpcClient rpcClient)
             :base(componentName, periodMs, log)
         {
+            _queue = queue;
+            _rpcClient = rpcClient;
         }
 
         public override async Task Execute()
@@ -36,46 +35,14 @@ namespace SolarCoinApi.CashOutJob
             var toSendRaw = await _queue.PeekRawMessageAsync();
             var toSend = JsonConvert.DeserializeObject<ToSendMessageFromQueue>(toSendRaw.AsString);
 
-            var usableTx = await _usableTxes.GetTopRecordAsync("part");
-            while (usableTx.Used)
-            {
-                await Task.Delay(500);
-                usableTx = await _usableTxes.GetTopRecordAsync("part");
-            }
+            await _log.WriteInfo("CashOutJob", "", "", $"Cash out request grabbed: Address: '{toSend.Address}', Amount: {toSend.Amount}");
 
+            var resultTxId = await _rpcClient.SendToAddress(toSend.Address, toSend.Amount);
 
-            var recip = new Dictionary<string, decimal>
-            {
-                {_hotWallet.Address, usableTx.Available - toSend.Amount - TX_PRICE},
-                {toSend.Address, toSend.Amount}
-            };
+            await _log.WriteInfo("CashOutJob", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId.TxId}'");
 
-            var rawTransaction = await _rpcClient.CreateRawTransaction(new object[] { new { txid = usableTx.Output, vout = 0 } }, recip);
-
-            var signedTransaction = await _rpcClient.SignRawTransaction(rawTransaction, _hotWallet.PrivKey);
-
-            var sentTxHash = await _rpcClient.SendRawTransaction(signedTransaction.Hex);
-
-            usableTx.Used = true;
-
-            await _usableTxes.InsertAsync(new HotWalletUsableTxEntity
-            {
-                PartitionKey = "part",
-                RowKey = IdGenerator.GenerateDateTimeIdNewFirst(DateTime.Now),
-                Available = usableTx.Available - toSend.Amount - TX_PRICE,
-                Output = 0,
-                TxId = sentTxHash,
-                Used = false
-            });
+            var popped = await _queue.GetRawMessageAsync();
         }
-    }
-
-    public class HotWalletUsableTxEntity : TableEntity
-    {
-        public string TxId { set; get; }
-        public int Output { set; get; }
-        public decimal Available { set; get; }
-        public bool Used { set; get; }
     }
 
     public class ToSendMessageFromQueue

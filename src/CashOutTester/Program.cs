@@ -46,13 +46,13 @@ namespace CashOutTester
                     new JsonRpcRawResponseFormatter(), null);
 
             var dic = new Dictionary<string, decimal>();
-            dic.Add("8Q7aVvbVkZviZw2oKnEeaNQoJtn1dEWSnz", 36m);
-            dic.Add("8PNfyewj7UkGR1NJehnXt7qZLp5a38aunL", 1.1m);
+            dic.Add("8Q7aVvbVkZviZw2oKnEeaNQoJtn1dEWSnz", 34m);
+            dic.Add("8HiCTcSKK6TDEFcpHG6Rsti5xRiTNYtWZX", 1.1m);
 
             string raw =
                 await
                     client.CreateRawTransaction(
-                        new object[] { new { txid = "8d0f1a1d596893de3131070680b0ee89ba2573eb7b29b46d13520386ff668520", vout = 0 } }, dic);
+                        new object[] { new { txid = "36a9aa711cd7f0f80c31d604b33256d1068ddfc03783a4184eaafd31b3ae8641", vout = 0 } }, dic);
 
             var signed = await client.SignRawTransaction(raw, "Ngz8HT1h9dzYQ4hfFwcqSHZ7fNmMTPQQGjkm9UVZkhZeXrdfNt7T");
 
