@@ -57,7 +57,8 @@ namespace SolarCoinApi.CashOutJobRunner
 
                 Console.WriteLine("The job has started! Enter 'q' to quit...");
 
-                while (Console.ReadLine() != "q") continue;
+                while (Console.ReadLine() != "q")
+                    continue;
 
                 timer.Stop();
 
