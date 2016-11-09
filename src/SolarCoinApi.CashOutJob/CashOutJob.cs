@@ -39,7 +39,7 @@ namespace SolarCoinApi.CashOutJob
 
             var resultTxId = await _rpcClient.SendToAddress(toSend.Address, toSend.Amount);
 
-            await _log.WriteInfo("CashOutJob", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId.TxId}'");
+            await _log.WriteInfo("CashOutJob", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
 
             var popped = await _queue.GetRawMessageAsync();
         }
@@ -49,24 +49,5 @@ namespace SolarCoinApi.CashOutJob
     {
         public string Address { set; get; }
         public decimal Amount { set; get; }
-    }
-
-    public class HotWallet
-    {
-        public string Address { set; get; }
-        public string PrivKey { set; get; }
-    }
-
-    public static class IdGenerator
-    {
-        public static string GenerateDateTimeId(DateTime creationDateTime)
-        {
-            return $"{creationDateTime.Ticks:d19}_{Guid.NewGuid():N}";
-        }
-
-        public static string GenerateDateTimeIdNewFirst(DateTime creationDateTime)
-        {
-            return $"{(DateTime.MaxValue.Ticks - creationDateTime.Ticks):d19}_{Guid.NewGuid():N}";
-        }
     }
 }

@@ -56,7 +56,7 @@ namespace SolarCoinApi.CashInJobRunner
 
                 var rpcClient = new JsonRpcClient(new JsonRpcClientRaw(new JsonRpcRequestBuilder(), logger, new OptionsManager<RpcWalletGeneratorOptions>(new List<IConfigureOptions<RpcWalletGeneratorOptions>>() { rawRpcClientOptions })), new JsonRpcRawResponseFormatter(), logger);
 
-                var timer = new CashInJob.CashInJob("CashInJob", 60*1000, logger, wallets, existingTxes, mongo, queue, rpcClient);
+                var timer = new CashInJob.CashInJob("CashInJob", settings.PeriodMs, logger, wallets, existingTxes, mongo, queue, rpcClient, settings.HotWalletAddress, settings.MinimumTxAmount);
 
                 timer.Start();
 

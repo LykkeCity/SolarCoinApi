@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SolarCoinApi.CashInJobRunner
+namespace SolarCoinApi.CashOutJobRunner
 {
     public class AppSettings
     {
@@ -15,7 +15,8 @@ namespace SolarCoinApi.CashInJobRunner
             var txt = File.ReadAllText(fileName);
             return Newtonsoft.Json.JsonConvert.DeserializeObject<AppSettings>(txt);
         }
-        public double PeriodMs { set; get; }
+        public int PeriodMs { set; get; }
+        public string HotWalletPrivKey { set; get; }
         public QueueSettings Queue { set; get; }
         public LoggerSettings Logger { set; get; }
         public RpcSettings Rpc { set; get; }

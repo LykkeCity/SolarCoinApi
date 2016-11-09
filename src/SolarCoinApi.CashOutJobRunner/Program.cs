@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.AzureStorage.Tables;
-using SolarCoinApi.CashInJobRunner;
+using SolarCoinApi.CashOutJobRunner;
 using SolarCoinApi.Common;
 using SolarCoinApi.Core;
 using SolarCoinApi.Core.Options;
@@ -19,7 +19,7 @@ namespace SolarCoinApi.CashOutJobRunner
         {
             try
             {
-                Console.Title = "SolarCoin CashIn job";
+                Console.Title = "SolarCoin CashOut job";
 
                 var settings = AppSettings.FromFile("appsettings.json");
 
@@ -45,7 +45,13 @@ namespace SolarCoinApi.CashOutJobRunner
 
                 var rpcClient = new JsonRpcClient(new JsonRpcClientRaw(new JsonRpcRequestBuilder(), logger, new OptionsManager<RpcWalletGeneratorOptions>(new List<IConfigureOptions<RpcWalletGeneratorOptions>>() { rawRpcClientOptions })), new JsonRpcRawResponseFormatter(), logger);
 
-                var timer = new CashOutJob.CashOutJob("CashInJob", 60 * 1000, logger, queue, rpcClient);
+                Console.WriteLine("Importing private key to the local node - this may take up to several minutes...");
+
+                rpcClient.ImportPrivateKey(settings.HotWalletPrivKey);
+
+                Console.WriteLine("The key was imported!");
+
+                var timer = new CashOutJob.CashOutJob("CashInJob", settings.PeriodMs, logger, queue, rpcClient);
 
                 timer.Start();
 

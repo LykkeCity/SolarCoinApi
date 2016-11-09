@@ -89,6 +89,8 @@ namespace SolarCoinApi.RpcJson.JsonRpc
             {
                 var req = _requestBuilder.BuildJson(method, args);
 
+                await _logger.WriteInfo("JsonRpcClientRaw", "Posting to RPC", "", $"req");
+
                 using (
                     HttpResponseMessage response =
                         await
@@ -128,7 +130,7 @@ namespace SolarCoinApi.RpcJson.JsonRpc
         Task<string> CreateRawTransaction(object[] inputs, Dictionary<string, decimal> to);
         Task<SignRawTransactionResponseModel> SignRawTransaction(string hex, string privateKey);
         Task<string> SendRawTransaction(string hex);
-        Task<SendToAddressResponseModel> SendToAddress(string address, decimal amount);
+        Task<string> SendToAddress(string address, decimal amount);
         Task<ImportPrivateKeyResponseModel> ImportPrivateKey(string privkey);
     }
 
@@ -166,14 +168,14 @@ namespace SolarCoinApi.RpcJson.JsonRpc
             return this.Invoke<string>("sendrawtransaction", hex);
         }
 
-        public Task<SendToAddressResponseModel> SendToAddress(string address, decimal amount)
+        public Task<string> SendToAddress(string address, decimal amount)
         {
-            return this.Invoke<SendToAddressResponseModel>("sendtoaddress", address, amount);
+            return this.Invoke<string>("sendtoaddress", address, amount);
         }
 
         public Task<ImportPrivateKeyResponseModel> ImportPrivateKey(string privkey)
         {
-            return this.Invoke<ImportPrivateKeyResponseModel>("importprivatekey", privkey);
+            return this.Invoke<ImportPrivateKeyResponseModel>("importprivkey", privkey);
         }
 
         private async Task<T> Invoke<T>(string method, params object[] args)

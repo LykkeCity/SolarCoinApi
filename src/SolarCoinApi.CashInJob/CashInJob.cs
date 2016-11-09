@@ -20,10 +20,12 @@ namespace SolarCoinApi.CashInJob
         private IMongoDatabase _blockchainExplorer;
         private AzureQueueExt _txesQueue;
         private IJsonRpcClient _rpcClient;
+        private string _hotWalletAddress;
+        private decimal _minTxAmount;
 
         public CashInJob(string componentName, int periodMs, ILog log,
             INoSQLTableStorage<WalletStorageEntity> generatedWallets, INoSQLTableStorage<ExistingTxEntity> existingTxes,
-            IMongoDatabase blockchainExplorer, AzureQueueExt txesQueue, IJsonRpcClient rpcClient)
+            IMongoDatabase blockchainExplorer, AzureQueueExt txesQueue, IJsonRpcClient rpcClient, string hotWalletAddress, decimal minTxAmount)
             : base(componentName, periodMs, log)
         {
             _generatedWallets = generatedWallets;
@@ -31,6 +33,8 @@ namespace SolarCoinApi.CashInJob
             _blockchainExplorer = blockchainExplorer;
             _txesQueue = txesQueue;
             _rpcClient = rpcClient;
+            _hotWalletAddress = hotWalletAddress;
+            _minTxAmount = minTxAmount;
         }
 
         public override async Task Execute()
@@ -63,23 +67,6 @@ namespace SolarCoinApi.CashInJob
                         decimal changeInSatoshis = ourVouts.Sum(x => x.Amount);
                         decimal changeInSlr = changeInSatoshis / 100000000m;
 
-                        var outs = new List<object>();
-                        for (int i = 0; i < tx.Vouts.Count; i++)
-                        {
-                            if (tx.Vouts[i].Addresses == wallet.Address)
-                                outs.Add(new { txid = tx.TxId, vout = i });
-                        }
-                        
-                        var dest = new Dictionary<string, decimal> { { "8Q7aVvbVkZviZw2oKnEeaNQoJtn1dEWSnz", changeInSlr - 0.1m } };
-
-                        var rawTx = await _rpcClient.CreateRawTransaction(outs.ToArray(), dest);
-                        var signedTx = await _rpcClient.SignRawTransaction(rawTx, wallet.PrivateKey);
-                        var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
-                        await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} ransferred to hot wallet");
-
-                        await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new { Address = wallet.Address, Amount = changeInSlr }));
-                        await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to queue");
-
                         await _exisingTxes.InsertAsync(new ExistingTxEntity
                         {
                             PartitionKey = "part",
@@ -87,50 +74,36 @@ namespace SolarCoinApi.CashInJob
                             TxId = tx.TxId
                         });
                         await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to the list of existing txes");
+
+                        if (changeInSlr < _minTxAmount)
+                        {
+                            await _log.WriteWarning(GetComponentName(), "", "", $"The amount for a transaction '{tx.TxId}' was {changeInSlr}, should be more than {_minTxAmount}");
+                            continue;
+                        }
+
+                        var outs = new List<object>();
+                        for (int i = 0; i < tx.Vouts.Count; i++)
+                        {
+                            if (tx.Vouts[i].Addresses == wallet.Address)
+                                outs.Add(new { txid = tx.TxId, vout = i });
+                        }
+                        
+                        var dest = new Dictionary<string, decimal> { { _hotWalletAddress, changeInSlr - 0.1m } };
+
+                        var rawTx = await _rpcClient.CreateRawTransaction(outs.ToArray(), dest);
+                        var signedTx = await _rpcClient.SignRawTransaction(rawTx, wallet.PrivateKey);
+                        var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
+                        await _log.WriteInfo(GetComponentName(), "", "", $"'{tx.TxId}' transferred to hot wallet resulting in tx with id '{sentTx}'");
+
+                        await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new { Address = wallet.Address, Amount = changeInSlr }));
+                        await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to queue");
+                        
                     }
                 }
             });
 
             await _log.WriteInfo(GetComponentName(), "", "", "Cycle ended");
-            /*
-            foreach (var wallet in _generatedWallets)
-            {
-                //var allTxesPerWallet = collection.FindSync(x => x.Vouts.Any(y => y.Addresses == wallet.Address)).ToList();
-
-                var allTxesPerWallet = collection.AsQueryable()
-                    .Where(e => e.Vouts.Any(y => y.Addresses == wallet.Address))
-                    .Select(e => e);
-
-                var newTxesPerWallet = allTxesPerWallet.Where(x => _exisingTxes.All(y => y.TxId != x.TxId));
-
-                foreach (var tx in newTxesPerWallet)
-                {
-                    var ourVouts = tx.Vouts.Where(x => x.Addresses == wallet.Address);
-
-                    decimal changeInSatoshis = ourVouts.Sum(x => x.Amount);
-
-                    var outs = new List<object>();
-                    for (int i = 0; i < tx.Vouts.Count; i++)
-                    {
-                        if(tx.Vouts[i].Addresses == wallet.Address)
-                            outs.Add(new {txid = tx.TxId, vout = i });
-                    }
-
-                    var dest = new Dictionary<string, decimal> {{"hotwalletaddress", changeInSatoshis - 0.1m}};
-
-                    var rawTx = await _rpcClient.CreateRawTransaction(outs.ToArray(), dest);
-                    var signedTx = await _rpcClient.SignRawTransaction(rawTx, wallet.PrivateKey);
-                    var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
-
-                    await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new { Address = wallet.Address, Amount = changeInSatoshis / 100000000m }));
-                    await _exisingTxes.InsertAsync(new ExistingTxEntity
-                    {
-                        PartitionKey = "part",
-                        RowKey = tx.TxId,
-                        TxId = tx.TxId
-                    }); 
-                }
-                */
+            
 
         }
     }

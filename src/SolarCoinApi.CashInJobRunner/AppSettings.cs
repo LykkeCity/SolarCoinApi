@@ -15,7 +15,9 @@ namespace SolarCoinApi.CashInJobRunner
             var txt = File.ReadAllText(fileName);
             return Newtonsoft.Json.JsonConvert.DeserializeObject<AppSettings>(txt);
         }
-        public double PeriodMs { set; get; }
+        public int PeriodMs { set; get; }
+        public string HotWalletAddress { get; set; }
+        public decimal MinimumTxAmount { get; set; }
         public ExplorerSettings Explorer { set; get; }
         public ExistingTxesStorageSettings ExistingTxesStorage { set; get; }
         public WalletsSettings GeneratedWalletsStorage { set; get; }
