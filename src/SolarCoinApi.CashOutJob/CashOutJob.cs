@@ -32,16 +32,20 @@ namespace SolarCoinApi.CashOutJob
             if (!numInQueue.HasValue || numInQueue.Value == 0)
                 return;
 
-            var toSendRaw = await _queue.PeekRawMessageAsync();
+            var toSendRaw = await _queue.GetRawMessageAsync();
+
+            if (toSendRaw == null)
+                return;
+
             var toSend = JsonConvert.DeserializeObject<ToSendMessageFromQueue>(toSendRaw.AsString);
 
-            await _log.WriteInfo("CashOutJob", "", "", $"Cash out request grabbed: Address: '{toSend.Address}', Amount: {toSend.Amount}");
+            await _log.WriteInfo(GetComponentName(), "", "", $"Cash out request grabbed: Address: '{toSend.Address}', Amount: {toSend.Amount}");
 
             var resultTxId = await _rpcClient.SendToAddress(toSend.Address, toSend.Amount);
 
-            await _log.WriteInfo("CashOutJob", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
-
-            var popped = await _queue.GetRawMessageAsync();
+            await _log.WriteInfo(GetComponentName(), "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
+            
+            await _queue.FinishRawMessageAsync(toSendRaw);
         }
     }
 

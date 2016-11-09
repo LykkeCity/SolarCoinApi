@@ -34,7 +34,6 @@ namespace SolarCoinApi.CashOutJobRunner
                 var logger = new TableLogger(new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions }));
 
                 var queue = new AzureQueueExt(settings.Queue.ConnectionString, settings.Queue.Name);
-                
 
                 var rawRpcClientOptions = new ConfigureOptions<RpcWalletGeneratorOptions>(x =>
                 {
@@ -51,7 +50,7 @@ namespace SolarCoinApi.CashOutJobRunner
 
                 Console.WriteLine("The key was imported!");
 
-                var timer = new CashOutJob.CashOutJob("CashInJob", settings.PeriodMs, logger, queue, rpcClient);
+                var timer = new CashOutJob.CashOutJob("CashOutJob", settings.PeriodMs, logger, queue, rpcClient);
 
                 timer.Start();
 
