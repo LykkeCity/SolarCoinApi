@@ -48,7 +48,7 @@ namespace SolarCoinApi.CashInJob
             {
                 foreach (var wallet in entities)
                 {
-                    await _log.WriteInfo(GetComponentName(), "", "", $"Beginning scanning address: {wallet.Address}");
+                    //await _log.WriteInfo(GetComponentName(), "", "", $"Beginning scanning address: {wallet.Address}");
                     var allTxesPerWallet = collection.AsQueryable()
                         .Where(e => e.Vouts.Any(y => y.Addresses == wallet.Address))
                         .Select(e => e).ToList();
@@ -57,7 +57,7 @@ namespace SolarCoinApi.CashInJob
 
                     var newTransactionMongoEntities = newTxesPerWallet as TransactionMongoEntity[] ?? newTxesPerWallet.ToArray();
 
-                    await _log.WriteInfo(GetComponentName(), "", "", $"{newTransactionMongoEntities.Length} new transactions found");
+                    //await _log.WriteInfo(GetComponentName(), "", "", $"{newTransactionMongoEntities.Length} new transactions found");
 
                     foreach (var tx in newTransactionMongoEntities)
                     {
@@ -95,7 +95,7 @@ namespace SolarCoinApi.CashInJob
                         var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
                         await _log.WriteInfo(GetComponentName(), "", "", $"'{tx.TxId}' transferred to hot wallet resulting in tx with id '{sentTx}'");
 
-                        await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new { Address = wallet.Address, Amount = changeInSlr }));
+                        await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new { Address = wallet.Address, Amount = changeInSlr, TxId = tx.TxId }));
                         //await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to queue");
                         
                     }
