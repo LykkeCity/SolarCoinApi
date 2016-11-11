@@ -93,7 +93,7 @@ namespace SolarCoinApi.CashInJob
                         var rawTx = await _rpcClient.CreateRawTransaction(outs.ToArray(), dest);
                         var signedTx = await _rpcClient.SignRawTransaction(rawTx, wallet.PrivateKey);
                         var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
-                        //await _log.WriteInfo(GetComponentName(), "", "", $"'{tx.TxId}' transferred to hot wallet resulting in tx with id '{sentTx}'");
+                        await _log.WriteInfo(GetComponentName(), "", "", $"'{tx.TxId}' transferred to hot wallet resulting in tx with id '{sentTx}'");
 
                         await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new { Address = wallet.Address, Amount = changeInSlr }));
                         //await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to queue");

@@ -24,18 +24,9 @@ namespace SolarCoinApi.RpcJson
 
         public async Task<WalletGeneratorContractModel> GenerateWalletAsync()
         {
-            try
-            {
                 var r = await _client.MakeKeyPair();
 
                 return new WalletGeneratorContractModel { PrivateKey = r.PrivKey, PublicKey = r.PublicKey, Address = r.Address };
-            }
-            catch (Exception exception)
-            {
-                var a = 23;
-                throw;
-            }
-            //return null;
         }
 
     }
