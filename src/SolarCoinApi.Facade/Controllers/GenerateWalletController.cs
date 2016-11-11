@@ -12,7 +12,7 @@ using SolarCoinApi.Core.Options;
 
 namespace SolarCoinApi.Facade.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/GenerateWallet")]
     public class GenerateWalletController : Controller
     {
         private readonly IWalletGenerator _walletGenerator;
@@ -26,6 +26,8 @@ namespace SolarCoinApi.Facade.Controllers
             _options = options;
             _logger = logger;
         }
+
+        [HttpGet("")]
         public async Task<IActionResult> Get()
         {
             try

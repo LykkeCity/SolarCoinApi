@@ -40,7 +40,7 @@ namespace SolarCoinApi.CashInJob
         public override async Task Execute()
         {
             Console.WriteLine("");
-            await _log.WriteInfo(GetComponentName(), "", "", "Starting cycle");
+            //await _log.WriteInfo(GetComponentName(), "", "", "Starting cycle");
 
             var collection = _blockchainExplorer.GetCollection<TransactionMongoEntity>("txes");
 
@@ -61,7 +61,7 @@ namespace SolarCoinApi.CashInJob
 
                     foreach (var tx in newTransactionMongoEntities)
                     {
-                        await _log.WriteInfo(GetComponentName(), "", "", $"  TxId: {tx.TxId}");
+                        //await _log.WriteInfo(GetComponentName(), "", "", $"  TxId: {tx.TxId}");
                         var ourVouts = tx.Vouts.Where(x => x.Addresses == wallet.Address);
 
                         decimal changeInSatoshis = ourVouts.Sum(x => x.Amount);
@@ -73,7 +73,7 @@ namespace SolarCoinApi.CashInJob
                             RowKey = tx.TxId,
                             TxId = tx.TxId
                         });
-                        await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to the list of existing txes");
+                        //await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to the list of existing txes");
 
                         if (changeInSlr < _minTxAmount)
                         {
@@ -93,16 +93,16 @@ namespace SolarCoinApi.CashInJob
                         var rawTx = await _rpcClient.CreateRawTransaction(outs.ToArray(), dest);
                         var signedTx = await _rpcClient.SignRawTransaction(rawTx, wallet.PrivateKey);
                         var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
-                        await _log.WriteInfo(GetComponentName(), "", "", $"'{tx.TxId}' transferred to hot wallet resulting in tx with id '{sentTx}'");
+                        //await _log.WriteInfo(GetComponentName(), "", "", $"'{tx.TxId}' transferred to hot wallet resulting in tx with id '{sentTx}'");
 
                         await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new { Address = wallet.Address, Amount = changeInSlr }));
-                        await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to queue");
+                        //await _log.WriteInfo(GetComponentName(), "", "", $"{tx.TxId} added to queue");
                         
                     }
                 }
             });
 
-            await _log.WriteInfo(GetComponentName(), "", "", "Cycle ended");
+            //await _log.WriteInfo(GetComponentName(), "", "", "Cycle ended");
             
 
         }

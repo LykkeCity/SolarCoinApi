@@ -25,12 +25,7 @@ namespace SolarCoinApi.Facade
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-
-            if (env.IsEnvironment("Development"))
-            {
-                // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
-                builder.AddApplicationInsightsSettings(developerMode: true);
-            }
+            
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
@@ -50,6 +45,15 @@ namespace SolarCoinApi.Facade
             services.AddTransient<ILog, TableLogger>();
 
             ConfigureRpc(services);
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SingleApiVersion(new Swashbuckle.Swagger.Model.Info
+                {
+                    Version = "v1",
+                    Title = "SolarCoin Wallets Generator"
+                });
+            });
         }
         private void ConfigureRpc(IServiceCollection services)
         {
@@ -65,16 +69,16 @@ namespace SolarCoinApi.Facade
 
             services.Configure<LoggerOptions>(x =>
             {
-                x.ConnectionString = Configuration.GetSection("ConnectionStrings:Default").Value;
-                x.ErrorTableName = Configuration.GetSection("DbTables1:ErrorTableName").Value;
-                x.InfoTableName = Configuration.GetSection("DbTables1:InfoTableName").Value;
-                x.WarningTableName = Configuration.GetSection("DbTables1:WarningTableName").Value;
+                x.ConnectionString = Configuration.GetSection("logging:connectionString").Value;
+                x.ErrorTableName = Configuration.GetSection("logging:errorTableName").Value;
+                x.InfoTableName = Configuration.GetSection("logging:infoTableName").Value;
+                x.WarningTableName = Configuration.GetSection("logging:warningTableName").Value;
             });
 
             services.Configure<WalletGeneratorControllerOptions>(x =>
             {
-                x.ConnectionString = Configuration.GetSection("ConnectionStrings:Default").Value;
-                x.TableName = Configuration.GetSection("DbTables1:WalletsTableName").Value;
+                x.ConnectionString = Configuration.GetSection("generatedWallets:connectionString").Value;
+                x.TableName = Configuration.GetSection("generatedWallets:tableName").Value;
             });
 
             services.AddTransient<IJsonRpcClient, JsonRpcClient>();
@@ -89,11 +93,26 @@ namespace SolarCoinApi.Facade
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseApplicationInsightsRequestTelemetry();
+            //app.UseApplicationInsightsRequestTelemetry();
 
-            app.UseApplicationInsightsExceptionTelemetry();
+            //app.UseApplicationInsightsExceptionTelemetry();
 
-            app.UseMvc();
+            //app.UseMvcWithDefaultRoute();
+
+            
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+            app.UseSwagger();
+
+            app.UseSwaggerUi();
+
+            
         }
     }
 }
