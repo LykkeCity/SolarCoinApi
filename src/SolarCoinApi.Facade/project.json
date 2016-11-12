@@ -20,7 +20,8 @@
     "SolarCoinApi.Core": "1.0.0-*",
     "SolarCoinApi.RpcJson": "1.0.0-*",
     "SolarCoinApi.Common": "1.0.0-*",
-    "Swashbuckle": "6.0.0-beta902"
+    "Swashbuckle": "6.0.0-beta902",
+    "System.Reflection": "4.1.0"
   },
 
   "tools": {
