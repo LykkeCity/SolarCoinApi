@@ -16,6 +16,8 @@ jsonfile.readFile(file, function (err, project) {
 	console.log("Project: " + project);
 	project.version = version;
 	jsonfile.writeFile(file, project, { spaces: 2 }, function (err) {
-		console.error(err);
+		if(err != null) {
+			console.error(err);
+		}
 	});
 })
