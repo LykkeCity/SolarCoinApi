@@ -6,7 +6,7 @@
 
   "publishOptions": {
     "include": [
-      "Release.json"
+      "appsettings.Release.json"
     ]
   },
 
