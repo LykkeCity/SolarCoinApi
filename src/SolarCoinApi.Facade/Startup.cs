@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,9 +24,13 @@ namespace SolarCoinApi.Facade
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-            
+#if DEBUG
+                .AddJsonFile("appsettings.Debug.json", optional: false, reloadOnChange: true);
+#elif RELEASE
+                .AddJsonFile("appsettings.Release.json", optional: false, reloadOnChange: true);
+#endif
+            //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
@@ -50,7 +55,7 @@ namespace SolarCoinApi.Facade
             {
                 c.SingleApiVersion(new Swashbuckle.Swagger.Model.Info
                 {
-                    Version = "v1",
+                    Version = $"v1",
                     Title = "SolarCoin Wallets Generator"
                 });
             });
@@ -92,15 +97,7 @@ namespace SolarCoinApi.Facade
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
-            //app.UseApplicationInsightsRequestTelemetry();
-
-            //app.UseApplicationInsightsExceptionTelemetry();
-
-            //app.UseMvcWithDefaultRoute();
-
             
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

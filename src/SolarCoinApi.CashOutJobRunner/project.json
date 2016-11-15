@@ -4,7 +4,14 @@
     "emitEntryPoint": true
   },
 
+  "publishOptions": {
+    "include": [
+      "Release.json"
+    ]
+  },
+
   "dependencies": {
+    "FluentValidation": "6.2.1",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.1"

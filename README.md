@@ -4,10 +4,10 @@ SolarCoinApi
 
 Written for dotnet core.
 
-In order to work properly, **appsettings.json** files need to be provided for projects
+In order to work properly, **appsettings.{Environment}.json** files need to be provided for projects
 
  * SolarCoinApi.**Facade**
  * SolarCoinApi.**CashOutJobRunner**
- *  SolarCoinApi.**CashInJobRunner**
+ * SolarCoinApi.**CashInJobRunner**
 
-Samples for each one are provided in projects' **README.md** files.
+Empty samples for each one are provided in respective projects under files.

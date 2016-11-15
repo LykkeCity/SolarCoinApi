@@ -4,6 +4,12 @@
     "emitEntryPoint": true
   },
 
+  "publishOptions": {
+    "include": [
+      "Release.json"
+    ]
+  },
+
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",

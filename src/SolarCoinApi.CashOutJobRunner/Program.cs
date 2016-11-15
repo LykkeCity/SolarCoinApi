@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation.Results;
 using Microsoft.Extensions.Options;
 using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.AzureStorage.Tables;
@@ -21,7 +22,11 @@ namespace SolarCoinApi.CashOutJobRunner
             {
                 Console.Title = "SolarCoin CashOut job";
 
-                var settings = AppSettings.FromFile("appsettings.json");
+#if DEBUG
+                var settings = AppSettings.FromFile("appsettings.Debug.json");
+#elif RELEASE
+                var settings = AppSettings.FromFile("appsettings.Release.json");
+#endif
 
                 IConfigureOptions<LoggerOptions> configureOptions = new ConfigureOptions<LoggerOptions>(x =>
                 {
@@ -77,6 +82,8 @@ namespace SolarCoinApi.CashOutJobRunner
 
                 Console.ReadKey();
             }
+
+
         }
     }
 }

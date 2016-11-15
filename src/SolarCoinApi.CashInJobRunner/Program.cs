@@ -23,8 +23,11 @@ namespace SolarCoinApi.CashInJobRunner
             try
             {
                 Console.Title = "SolarCoin CashIn job";
-
-                var settings = AppSettings.FromFile("appsettings.json");
+#if DEBUG
+                var settings = AppSettings.FromFile("appsettings.Debug.json");
+#elif RELEASE
+                var settings = AppSettings.FromFile("appsettings.Release.json");
+#endif
 
                 IConfigureOptions<LoggerOptions> configureOptions = new ConfigureOptions<LoggerOptions>(x =>
                 {
