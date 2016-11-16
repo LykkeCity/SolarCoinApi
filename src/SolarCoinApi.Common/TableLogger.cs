@@ -30,14 +30,16 @@ namespace SolarCoinApi.Common
         }
 
         */
-
-        public TableLogger(IOptions<LoggerOptions> options)
+        private bool _verbose;
+        public TableLogger(IOptions<LoggerOptions> options, bool verbose = false)
         {
             _options = options;
 
             _errorTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.ErrorTableName, null);
             _warningTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.WarningTableName, null);
             _infoTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.InfoTableName, null);
+
+            _verbose = verbose;
         }
 
         public TableLogger(INoSQLTableStorage<LogEntity> storage)
@@ -64,7 +66,7 @@ namespace SolarCoinApi.Common
 
         public Task WriteInfo(string component, string process, string context, string info, DateTime? dateTime = null)
         {
-            return Insert("info", component, process, context, null, null, info, dateTime);
+            return _verbose ? Insert("info", component, process, context, null, null, info, dateTime) : Task.CompletedTask;
         }
 
         public Task WriteWarning(string component, string process, string context, string info, DateTime? dateTime = null)

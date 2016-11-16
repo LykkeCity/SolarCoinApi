@@ -36,7 +36,7 @@ namespace SolarCoinApi.CashOutJobRunner
                     x.WarningTableName = settings.Logger.WarningTableName;
                 });
 
-                var logger = new TableLogger(new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions }));
+                var logger = new TableLogger(new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions }), settings.VerboseLogging);
 
                 var queue = new AzureQueueExt(settings.Queue.ConnectionString, settings.Queue.Name);
 

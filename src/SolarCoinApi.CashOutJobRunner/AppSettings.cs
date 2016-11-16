@@ -55,6 +55,7 @@ namespace SolarCoinApi.CashOutJobRunner
         }
         
         public int PeriodMs { set; get; }
+        public bool VerboseLogging { set; get; }
         public string HotWalletPrivKey { set; get; }
         public QueueSettings Queue { set; get; }
         public LoggerSettings Logger { set; get; }

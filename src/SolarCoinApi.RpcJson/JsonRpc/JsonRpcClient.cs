@@ -89,7 +89,7 @@ namespace SolarCoinApi.RpcJson.JsonRpc
             {
                 var req = _requestBuilder.BuildJson(method, args);
 
-                //await _logger.WriteInfo("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
+                await _logger.WriteInfo("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
 
                 using (
                     HttpResponseMessage response =
@@ -103,7 +103,7 @@ namespace SolarCoinApi.RpcJson.JsonRpc
                     if (response.StatusCode != HttpStatusCode.OK &&
                         response.StatusCode != HttpStatusCode.InternalServerError)
                     {
-                        //Console.Write(response.StatusCode);
+                        Console.Write(response.StatusCode);
                         throw new Exception(
                             $"Request to RPC on '{_options.Value.Endpoint}' with username '{_options.Value.Username}' and password '{_options.Value.Password}' ended up with Status '{response.StatusCode}'");
 
