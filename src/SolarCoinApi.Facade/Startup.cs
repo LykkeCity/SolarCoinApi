@@ -67,9 +67,9 @@ namespace SolarCoinApi.Facade
 
             services.Configure<RpcWalletGeneratorOptions>(x =>
             {
-                x.Endpoint = Configuration.GetSection("RpcServer:Endpoint").Value;
-                x.Username = Configuration.GetSection("RpcServer:Username").Value;
-                x.Password = Configuration.GetSection("RpcServer:Password").Value;
+                x.Endpoint = Configuration.GetSection("rpc:Endpoint").Value;
+                x.Username = Configuration.GetSection("rpc:Username").Value;
+                x.Password = Configuration.GetSection("rpc:Password").Value;
             });
 
             services.Configure<LoggerOptions>(x =>
@@ -97,7 +97,7 @@ namespace SolarCoinApi.Facade
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -109,7 +109,7 @@ namespace SolarCoinApi.Facade
 
             app.UseSwaggerUi();
 
-            
+
         }
     }
 }

@@ -27,13 +27,8 @@ namespace SolarCoinApi.AzureStorage.Queue
 
     public interface IQueueExt
     {
+        Task PutRawMessageAsync(string msg);
         Task<string> PutMessageAsync(object itm);
-
-        Task PutRawMessageAsync(string message);
-        Task<CloudQueueMessage> GetRawMessageAsync();
-        Task<CloudQueueMessage> PeekRawMessageAsync();
-        Task FinishRawMessageAsync(CloudQueueMessage message);
-
 
         Task<QueueData> GetMessageAsync();
         Task FinishMessageAsync(QueueData token);
@@ -43,7 +38,8 @@ namespace SolarCoinApi.AzureStorage.Queue
         Task ClearAsync();
 
         void RegisterTypes(params QueueType[] type);
-
-        Task<int?> Count();
+        Task<CloudQueueMessage> GetRawMessageAsync(int visibilityTimeoutSeconds = 30);
+        Task FinishRawMessageAsync(CloudQueueMessage msg);
+        Task ReleaseRawMessageAsync(CloudQueueMessage msg);
     }
 }

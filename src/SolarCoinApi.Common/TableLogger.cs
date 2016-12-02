@@ -42,7 +42,7 @@ namespace SolarCoinApi.Common
             _verbose = verbose;
         }
 
-        public TableLogger(INoSQLTableStorage<LogEntity> storage)
+        public TableLogger(INoSQLTableStorage<LogEntity> storage, bool verbose = false)
         {
             _errorTableStorage = storage;
             _warningTableStorage = storage;

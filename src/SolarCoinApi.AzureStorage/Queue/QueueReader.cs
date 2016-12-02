@@ -6,71 +6,44 @@ using SolarCoinApi.Core.Timers;
 
 namespace SolarCoinApi.AzureStorage.Queue
 {
-    public class QueueReader : TimerPeriod, IQueueReader
+    public class AzureQueueReader : IQueueReader
     {
-        private readonly IQueueExt _queueExt;
+        private readonly int _visibilityTimeoutSeconds = (int)TimeSpan.FromMinutes(10).TotalSeconds;
 
-        public QueueReader(IQueueExt queueExt, string componentName, int periodMs, ILog log) : base(componentName, periodMs, log)
+        private readonly IQueueExt _queue;
+
+        public AzureQueueReader(IQueueExt queue)
         {
-            _queueExt = queueExt;
+            _queue = queue;
         }
 
-        public override async Task Execute()
+        public async Task<IQueueMessage> GetMessageAsync()
         {
-            var queueData = await _queueExt.GetMessageAsync();
-
-            while (queueData != null)
-            {
-                try
-                {
-                    // if prehandler tells Skip the event - then we skip the event
-                    if (_preHandler != null)
-                        if (!await _preHandler(queueData.Data))
-                        {
-                            if (_errorHandlers.ContainsKey(queueData.Data.GetType()))
-                            {
-                                await _errorHandlers[queueData.Data.GetType()](queueData.Data);
-                            }
-                            continue;
-                        }
-
-                    //if was data is null => unregistered(unknown) type
-                    if (queueData.Data == null)
-                    {
-                        continue;
-                    }
-
-                    var handler = _handlers[queueData.Data.GetType()];
-                    await handler(queueData.Data);
-                }
-                finally
-                {
-                    await _queueExt.FinishMessageAsync(queueData);
-                    queueData = await _queueExt.GetMessageAsync();
-
-                }
-
-            }
+            var msg = await _queue.GetRawMessageAsync(_visibilityTimeoutSeconds);
+            if (msg != null)
+                return new AzureMessage(msg);
+            return null;
         }
 
-        private readonly Dictionary<Type, Func<object, Task>> _handlers = new Dictionary<Type, Func<object, Task>>();
-        public void RegisterHandler<T>(string id, Func<T, Task> handler)
+        public Task AddMessageAsync(string message)
         {
-            _queueExt.RegisterTypes(QueueType.Create(id, typeof(T)));
-            _handlers.Add(typeof(T), itm => handler((T)itm));
+            return _queue.PutRawMessageAsync(message);
         }
 
-        private readonly Dictionary<Type, Func<object, Task>> _errorHandlers = new Dictionary<Type, Func<object, Task>>();
-        public void RegisterErrorHandler<T>(string id, Func<T, Task> handler)
+        public Task FinishMessageAsync(IQueueMessage msg)
         {
-            _errorHandlers.Add(typeof(T), itm => handler((T)itm));
+            var internalMsg = (msg as AzureMessage)?.Msg;
+            if (internalMsg != null)
+                return _queue.FinishRawMessageAsync(internalMsg);
+            return Task.CompletedTask;
         }
 
-        private Func<object, Task<bool>> _preHandler;
-
-        public void RegisterPreHandler(Func<object, Task<bool>> preHandler)
+        public Task ReleaseMessageAsync(IQueueMessage msg)
         {
-            _preHandler = preHandler;
+            var internalMsg = (msg as AzureMessage)?.Msg;
+            if (internalMsg != null)
+                return _queue.ReleaseRawMessageAsync(internalMsg);
+            return Task.CompletedTask;
         }
     }
 }

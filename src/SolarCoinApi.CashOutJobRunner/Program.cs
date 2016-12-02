@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentValidation.Results;
 using Microsoft.Extensions.Options;
 using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.AzureStorage.Tables;
@@ -11,6 +10,9 @@ using SolarCoinApi.Common;
 using SolarCoinApi.Core;
 using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson.JsonRpc;
+using SimpleInjector;
+using SolarCoinApi.Core.Log;
+using SolarCoinApi.Common.Triggers;
 
 namespace SolarCoinApi.CashOutJobRunner
 {
@@ -23,48 +25,30 @@ namespace SolarCoinApi.CashOutJobRunner
                 Console.Title = "SolarCoin CashOut job";
 
 #if DEBUG
-                var settings = AppSettings.FromFile("appsettings.Debug.json");
+                var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.json");
 #elif RELEASE
-                var settings = AppSettings.FromFile("appsettings.Release.json");
+                var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.json");
 #endif
 
-                IConfigureOptions<LoggerOptions> configureOptions = new ConfigureOptions<LoggerOptions>(x =>
-                {
-                    x.ConnectionString = settings.Logger.ConnectionString;
-                    x.ErrorTableName = settings.Logger.ErrorTableName;
-                    x.InfoTableName = settings.Logger.InfoTableName;
-                    x.WarningTableName = settings.Logger.WarningTableName;
-                });
+                var container = new Container();
 
-                var logger = new TableLogger(new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions }), settings.VerboseLogging);
+                Bootstrap.Start(container, settings);
 
-                var queue = new AzureQueueExt(settings.Queue.ConnectionString, settings.Queue.Name);
-
-                var rawRpcClientOptions = new ConfigureOptions<RpcWalletGeneratorOptions>(x =>
-                {
-                    x.Endpoint = settings.Rpc.Endpoint;
-                    x.Password = settings.Rpc.Password;
-                    x.Username = settings.Rpc.Username;
-                });
-
-                var rpcClient = new JsonRpcClient(new JsonRpcClientRaw(new JsonRpcRequestBuilder(), logger, new OptionsManager<RpcWalletGeneratorOptions>(new List<IConfigureOptions<RpcWalletGeneratorOptions>>() { rawRpcClientOptions })), new JsonRpcRawResponseFormatter(), logger);
-
+                var rpcClient = container.GetInstance<IJsonRpcClient>();
+                
                 Console.WriteLine("Importing private key to the local node - this may take up to several minutes...");
 
-                rpcClient.ImportPrivateKey(settings.HotWalletPrivKey);
+                rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).Wait();
 
                 Console.WriteLine("The key was imported!");
 
-                var timer = new CashOutJob.CashOutJob("CashOutJob", settings.PeriodMs, logger, queue, rpcClient);
-
-                timer.Start();
-
+                var triggerHost = new TriggerHost(container);
+                triggerHost.StartAndBlock();
+                
                 Console.WriteLine("The job has started! Enter 'q' to quit...");
 
                 while (Console.ReadLine() != "q")
                     continue;
-
-                timer.Stop();
 
             }
             catch (Exception e)

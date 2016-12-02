@@ -37,6 +37,11 @@ namespace SolarCoinApi.AzureStorage.Queue
             };
         }
 
+        public Task PutRawMessageAsync(string msg)
+        {
+            return _queue.AddMessageAsync(new CloudQueueMessage(msg));
+        }
+
         public Task FinishMessageAsync(QueueData token)
         {
             var cloudQueueMessage = token.Token as CloudQueueMessage;
@@ -55,32 +60,6 @@ namespace SolarCoinApi.AzureStorage.Queue
 
             await _queue.AddMessageAsync(new CloudQueueMessage(msg));
             return msg;
-        }
-
-        public async Task PutRawMessageAsync(string message)
-        {
-            await _queue.AddMessageAsync(new CloudQueueMessage(message));
-        }
-
-        public async Task<CloudQueueMessage> GetRawMessageAsync()
-        {
-            return await _queue.GetMessageAsync();
-        }
-
-        public async Task<CloudQueueMessage> PeekRawMessageAsync()
-        {
-            return await _queue.PeekMessageAsync();
-        }
-
-        public async Task FinishRawMessageAsync(CloudQueueMessage message)
-        {
-            await _queue.DeleteMessageAsync(message);
-        }
-
-        public async Task<int?> Count()
-        {
-            await _queue.FetchAttributesAsync();
-            return _queue.ApproximateMessageCount;
         }
 
         public async Task<object[]> GetMessagesAsync(int maxCount)
@@ -105,6 +84,21 @@ namespace SolarCoinApi.AzureStorage.Queue
         {
             foreach (var type in types)
                 _types.Add(type.Id, type.Type);
+        }
+
+        public Task<CloudQueueMessage> GetRawMessageAsync(int visibilityTimeoutSeconds = 30)
+        {
+            return _queue.GetMessageAsync(TimeSpan.FromSeconds(visibilityTimeoutSeconds), null, null);
+        }
+
+        public Task FinishRawMessageAsync(CloudQueueMessage msg)
+        {
+            return _queue.DeleteMessageAsync(msg);
+        }
+
+        public Task ReleaseRawMessageAsync(CloudQueueMessage msg)
+        {
+            return _queue.UpdateMessageAsync(msg, TimeSpan.Zero, MessageUpdateFields.Visibility);
         }
 
         private string SerializeObject(object itm)

@@ -24,6 +24,10 @@ namespace SolarCoinApi.Core.Utils
         {
             return JsonConvert.DeserializeObject<T>(json);
         }
+        public static object DeserializeJson(this string json, Type type)
+        {
+            return JsonConvert.DeserializeObject(json, type);
+        }
 
         public static string ToJson(this object src, bool ignoreNulls = false)
         {

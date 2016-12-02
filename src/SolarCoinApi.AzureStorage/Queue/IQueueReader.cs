@@ -6,11 +6,11 @@ using SolarCoinApi.Core.Timers.Interfaces;
 namespace SolarCoinApi.AzureStorage.Queue
 {
 
-    public interface IQueueReader : IStarter, ITimerCommand
+    public interface IQueueReader
     {
-        void RegisterPreHandler(Func<object, Task<bool>> preHandler);
-        void RegisterHandler<T>(string id, Func<T, Task> handler);
-        void RegisterErrorHandler<T>(string id, Func<T, Task> handler);
-        string GetComponentName();
+        Task<IQueueMessage> GetMessageAsync();
+        Task AddMessageAsync(string message);
+        Task FinishMessageAsync(IQueueMessage msg);
+        Task ReleaseMessageAsync(IQueueMessage msg);
     }
 }
