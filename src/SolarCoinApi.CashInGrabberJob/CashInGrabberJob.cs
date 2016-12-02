@@ -6,6 +6,8 @@ using SolarCoinApi.AzureStorage.Queue;
 using MongoDB.Driver.Linq;
 using System.Linq;
 using SolarCoinApi.Core;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace SolarCoinApi.CashInGrabberJob
 {
@@ -39,27 +41,32 @@ namespace SolarCoinApi.CashInGrabberJob
 
         public override async Task Execute()
         {
-            var newTxes = _blockchainExplorer.AsQueryable().Where(e => e.WasProcessed == false).Take(1000).ToList();
+            var newTxes = _blockchainExplorer.Find(Builders<TransactionMongoEntity>.Filter.Exists(d => d.WasProcessed, false))
+              .Limit(_threshold)
+              .ToList();
 
             if (newTxes.Count() == 0)
             {
+                await _log.WriteInfo(GetComponentName(), "", "", "No unprocessed tx-es found. Reseting period to normal");
                 UpdatePeriod(_normalPeriodMs);
                 return;
             }
 
             if(newTxes.Count() == _threshold)
             {
+                await _log.WriteInfo(GetComponentName(), "", "", "Threshold reached. Minifying period.");
                 UpdatePeriod(0);
             }
 
             if(newTxes.Count() < _threshold)
             {
+                await _log.WriteInfo(GetComponentName(), "", "", $"{newTxes.Count()} unprocessed tx-es found. Reseting period to normal. Processing...");
                 UpdatePeriod(_normalPeriodMs);
             }
 
             foreach(var tx in newTxes)
             {
-                await _transitQueue.PutMessageAsync(ProduceTransitQueueMessage(tx));
+                await _transitQueue.PutRawMessageAsync(JsonConvert.SerializeObject(ProduceTransitQueueMessage(tx)));
 
                 var filter = Builders<TransactionMongoEntity>.Filter.Eq("txid", tx.TxId);
 
@@ -67,6 +74,9 @@ namespace SolarCoinApi.CashInGrabberJob
 
                 await _blockchainExplorer.UpdateOneAsync(filter, update);
             }
+
+            await _log.WriteInfo(GetComponentName(), "", "", $"{newTxes.Count()} tx-es successfully processed!");
+
         }
     }
 }

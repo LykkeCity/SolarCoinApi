@@ -31,4 +31,12 @@ namespace SolarCoinApi.Core.Settings
         public string Username { set; get; }
         public string Password { set; get; }
     }
+
+    public class MongoSettings
+    {
+        public string Host { set; get; }
+        public string Port { set; get; }
+        public string DbName { set; get; }
+        public string CollectionName { set; get; }
+    }
 }

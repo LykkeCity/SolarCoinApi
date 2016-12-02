@@ -25,9 +25,9 @@ namespace SolarCoinApi.CashOutJobRunner
                 Console.Title = "SolarCoin CashOut job";
 
 #if DEBUG
-                var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.json");
+                var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
-                var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.json");
+                var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.Release.json");
 #endif
 
                 var container = new Container();
