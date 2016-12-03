@@ -48,7 +48,7 @@ namespace SolarCoinApi.CashOutJobRunner
 
             container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.Queue.ConnectionString));
 
-            container.Register<CashOutQueueTrigger>(Lifestyle.Singleton);
+            container.Register<CashOutQueueTrigger>(Lifestyle.Transient);
 
             container.Register<QueueTriggerBinding>(Lifestyle.Transient);
 
