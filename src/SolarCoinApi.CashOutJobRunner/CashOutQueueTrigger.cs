@@ -22,7 +22,7 @@ namespace SolarCoinApi.CashOutJobRunner
             _log = log;
         }
 
-        [QueueTrigger("solar-in")]
+        [QueueTrigger("solar-out")]
         public async Task ReceiveMessage(ToSendMessageFromQueue message)
         {
             await _log.WriteInfo("", "", "", $"Cash out request grabbed: Address: '{message.Address}', Amount: {message.Amount}");
