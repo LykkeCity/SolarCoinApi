@@ -28,6 +28,11 @@ namespace SolarCoinApi.CashOutJobRunner
             if (string.IsNullOrWhiteSpace(Logger.WarningTableName))
                 throw new Exception("Logger Warning Table Name should be present");
 
+            if (string.IsNullOrWhiteSpace(ExistingTxes.ConnectionString))
+                throw new Exception("Existing Transaction Connection String should be present");
+            if (string.IsNullOrWhiteSpace(ExistingTxes.Name))
+                throw new Exception("Existing Transaction Table Name should be present");
+
             if (string.IsNullOrWhiteSpace(Queue.ConnectionString))
                 throw new Exception("Queue Connection String should be present");
             if (string.IsNullOrWhiteSpace(Queue.Name))
@@ -45,6 +50,7 @@ namespace SolarCoinApi.CashOutJobRunner
         public bool VerboseLogging { set; get; }
         public string HotWalletPrivKey { set; get; }
         public QueueSettings Queue { set; get; }
+        public TableSettings ExistingTxes { set; get; }
         public LoggerSettings Logger { set; get; }
         public RpcSettings Rpc { set; get; }
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleInjector;
 using SolarCoinApi.AzureStorage.Queue;
+using SolarCoinApi.AzureStorage.Tables;
 using SolarCoinApi.Common;
 using SolarCoinApi.Common.Triggers.Bindings;
 using SolarCoinApi.Core.Log;
@@ -48,7 +49,11 @@ namespace SolarCoinApi.CashOutJobRunner
 
             container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.Queue.ConnectionString));
 
-            container.Register<CashOutQueueTrigger>(Lifestyle.Transient);
+            container.Register<CashOutQueueTrigger>(() => new CashOutQueueTrigger(
+                container.GetInstance<IJsonRpcClient>(),
+                new AzureTableStorage<ExistingCashOutEntity>(settings.ExistingTxes.ConnectionString, settings.ExistingTxes.Name, container.GetInstance<ILog>()),
+                container.GetInstance<ILog>()
+                ), Lifestyle.Transient);
 
             container.Register<QueueTriggerBinding>(Lifestyle.Transient);
 
