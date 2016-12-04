@@ -34,10 +34,10 @@ namespace SolarCoinApi.CashOutJobRunner
             if (_existingTxes.Any(x => x.RowKey == message.Id))
                 return;
 
-            var resultTxId = await _rpcClient.SendToAddress(message.Address, message.Amount);
-
             await _existingTxes.InsertAsync(new ExistingCashOutEntity { PartitionKey = "part", RowKey = message.Id });
 
+            var resultTxId = await _rpcClient.SendToAddress(message.Address, message.Amount);
+            
             await _log.WriteInfo("", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
         }
     }

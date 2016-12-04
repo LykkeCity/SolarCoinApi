@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SolarCoinApi.CashInGrabberJob;
-using CashInGrabberJob = SolarCoinApi.CashInGrabberJob.CashInGrabberJob;
 using SolarCoinApi.Core.Options;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
