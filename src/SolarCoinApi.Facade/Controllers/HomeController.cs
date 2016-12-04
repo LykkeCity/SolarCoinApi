@@ -9,9 +9,9 @@ namespace SolarCoinApi.Facade.Controllers
 {
     public class HomeController : Controller
     {
-        public string Version()
+        public IActionResult Version()
         {
-            return typeof(HomeController).GetTypeInfo().Assembly.GetName().Version.ToString();
+            return Json(new { Version = typeof(HomeController).GetTypeInfo().Assembly.GetName().Version.ToString() });
         }
     }
 }
