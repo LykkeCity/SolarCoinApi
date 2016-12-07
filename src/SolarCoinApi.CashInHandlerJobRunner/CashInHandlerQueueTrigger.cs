@@ -84,6 +84,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             catch (Exception e)
             {
                 await _log.WriteError("CashInHandlerQueueTrigger", "", "", e);
+                throw;
             }
         }
     }

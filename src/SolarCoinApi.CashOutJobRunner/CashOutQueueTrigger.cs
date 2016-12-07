@@ -44,6 +44,7 @@ namespace SolarCoinApi.CashOutJobRunner
             } catch (Exception e)
             {
                 await _log.WriteError("CashOutQueueTrigger", "", "", e);
+                throw;
             }
             
         }
