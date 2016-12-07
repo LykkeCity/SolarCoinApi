@@ -48,7 +48,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 
             container.Register<IJsonRpcClient>(() => new JsonRpcClient(container.GetInstance<IJsonRpcClientRaw>(), container.GetInstance<IJsonRpcRawResponseFormatter>(), container.GetInstance<ILog>()), Lifestyle.Singleton);
 
-            container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.TransitQueue.ConnectionString));
+            container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.TransitQueue.ConnectionString), Lifestyle.Singleton);
 
             container.Register<CashInHandlerQueueTrigger>(
                 () => new CashInHandlerQueueTrigger(
