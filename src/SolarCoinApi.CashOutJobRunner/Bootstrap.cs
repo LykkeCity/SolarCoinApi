@@ -4,6 +4,7 @@ using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.AzureStorage.Tables;
 using SolarCoinApi.Common;
 using SolarCoinApi.Common.Triggers.Bindings;
+using SolarCoinApi.Core;
 using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson.JsonRpc;
@@ -32,6 +33,8 @@ namespace SolarCoinApi.CashOutJobRunner
 
             //container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.Queue.ConnectionString, settings.Queue.Name); }, Lifestyle.Transient);
 
+            container.Register<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())), Lifestyle.Singleton);
+
             container.Register<IJsonRpcRawResponseFormatter, JsonRpcRawResponseFormatter>(Lifestyle.Singleton);
 
             container.Register<IJsonRpcRequestBuilder, JsonRpcRequestBuilder>(Lifestyle.Singleton);
@@ -54,6 +57,13 @@ namespace SolarCoinApi.CashOutJobRunner
                 new AzureTableStorage<ExistingCashOutEntity>(settings.ExistingTxes.ConnectionString, settings.ExistingTxes.Name, container.GetInstance<ILog>()),
                 container.GetInstance<ILog>()
                 ), Lifestyle.Singleton);
+
+
+            container.Register<MonitoringJob>(() => new MonitoringJob(
+                    "SolarCoinApi.CashOutJob",
+                    container.GetInstance<IMonitoringRepository>(),
+                    container.GetInstance<ILog>()
+                    ), Lifestyle.Singleton);
 
             container.Register<QueueTriggerBinding>(Lifestyle.Singleton);
 

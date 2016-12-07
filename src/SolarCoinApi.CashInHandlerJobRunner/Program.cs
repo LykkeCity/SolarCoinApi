@@ -15,6 +15,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
     {
         public static void Main(string[] args)
         {
+            MonitoringJob monitoringJob = null;
+
             try
             {
                 Console.Title = "SolarCoin CashIn Handler job";
@@ -24,13 +26,19 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 #elif RELEASE
                 var settings = new AppSettings<CashInHandlerSettings>().LoadFile("appsettings.Release.json");
 #endif
-
+                
                 var container = new Container();
 
                 Bootrsrap.Start(container, settings);
 
+                monitoringJob = container.GetInstance<MonitoringJob>();
+
+                monitoringJob.Start();
+
+
                 var triggerHost = new TriggerHost(container);
                 triggerHost.StartAndBlock();
+
 
                 Console.WriteLine("The job has started! Enter 'q' to quit...");
 
@@ -40,6 +48,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             }
             catch (Exception e)
             {
+                monitoringJob?.Stop();
+
                 var err = e;
                 while (err != null)
                 {

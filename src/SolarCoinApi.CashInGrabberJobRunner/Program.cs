@@ -24,6 +24,8 @@ namespace SolarCoinApi.CashInGrabberJobRunner
     {
         public static void Main(string[] args)
         {
+            MonitoringJob monitoringJob = null;
+
             try
             {
                 var container = new Container();
@@ -54,6 +56,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
                 container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.TransitQueue.ConnectionString, settings.TransitQueue.Name); }, Lifestyle.Singleton);
 
+                container.Register<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())), Lifestyle.Singleton);
 
                 container.Register<CashInGrabberJob.CashInGrabberJob>(() => new CashInGrabberJob.CashInGrabberJob(
                     "CashInGrabber",
@@ -63,10 +66,19 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                     container.GetInstance<IQueueExt>(),
                     settings.Threshold), Lifestyle.Singleton);
 
+                container.Register<MonitoringJob>(() => new MonitoringJob(
+                    "SolarCoinApi.CashInGrabber",
+                    container.GetInstance<IMonitoringRepository>(),
+                    container.GetInstance<ILog>()
+                    ), Lifestyle.Singleton);
+
                 var job = container.GetInstance<CashInGrabberJob.CashInGrabberJob>();
 
                 job.Start();
 
+                monitoringJob = container.GetInstance<MonitoringJob>();
+
+                monitoringJob.Start();
 
                 Console.WriteLine("The job has started! Enter 'q' to quit...");
 
@@ -76,6 +88,8 @@ namespace SolarCoinApi.CashInGrabberJobRunner
             }
             catch (Exception e)
             {
+                monitoringJob?.Stop();
+
                 var err = e;
                 while (err != null)
                 {
@@ -87,7 +101,9 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                     err = err.InnerException;
                 }
 
+#if DEBUG
                 Console.ReadKey();
+#endif
             }
         }
     }

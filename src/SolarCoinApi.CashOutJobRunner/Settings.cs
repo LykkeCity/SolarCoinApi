@@ -13,6 +13,14 @@ namespace SolarCoinApi.CashOutJobRunner
 
     public class CashOutSettings : IValidatable
     {
+        public int PeriodMs { set; get; }
+        public bool VerboseLogging { set; get; }
+        public string HotWalletPrivKey { set; get; }
+        public QueueSettings Queue { set; get; }
+        public TableSettings Monitoring { set; get; }
+        public TableSettings ExistingTxes { set; get; }
+        public LoggerSettings Logger { set; get; }
+        public RpcSettings Rpc { set; get; }
 
         public void Validate()
         {
@@ -33,6 +41,11 @@ namespace SolarCoinApi.CashOutJobRunner
             if (string.IsNullOrWhiteSpace(ExistingTxes.Name))
                 throw new Exception("Existing Transaction Table Name should be present");
 
+            if (string.IsNullOrWhiteSpace(Monitoring.Name))
+                throw new Exception("Monitoring Connection Name should be present");
+            if (string.IsNullOrWhiteSpace(Monitoring.ConnectionString))
+                throw new Exception("Monitoring Name should be present");
+
             if (string.IsNullOrWhiteSpace(Queue.ConnectionString))
                 throw new Exception("Queue Connection String should be present");
             if (string.IsNullOrWhiteSpace(Queue.Name))
@@ -46,12 +59,5 @@ namespace SolarCoinApi.CashOutJobRunner
                 throw new Exception("RPC Password should be present");
         }
         
-        public int PeriodMs { set; get; }
-        public bool VerboseLogging { set; get; }
-        public string HotWalletPrivKey { set; get; }
-        public QueueSettings Queue { set; get; }
-        public TableSettings ExistingTxes { set; get; }
-        public LoggerSettings Logger { set; get; }
-        public RpcSettings Rpc { set; get; }
     }
 }

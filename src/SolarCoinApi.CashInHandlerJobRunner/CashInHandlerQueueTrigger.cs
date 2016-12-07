@@ -34,12 +34,13 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             _txFee = txFee;
             _minTxAmount = minTxAmount;
         }
-
+        
         [QueueTrigger("solar-transit")]
         public async Task ReceiveMessage(TransitQueueMessage message)
         {
             try
             {
+
                 var ourVouts = new List<VoutEx>();
 
                 // get outputs that where dedicated to our users
@@ -106,5 +107,4 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             return Address == anotherModel.Address && Amount == anotherModel.Amount && TxId == anotherModel.TxId;
         }
     }
-
 }

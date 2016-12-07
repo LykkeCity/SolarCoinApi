@@ -12,6 +12,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         public TableSettings GeneratedWallets { set; get; }
         public LoggerSettings Logger { set; get; }
         public QueueSettings CashOutQueue { set; get; }
+        public TableSettings Monitoring { set; get; }
         public QueueSettings TransitQueue { set; get; }
         public RpcSettings Rpc { set; get; }
         public string HotWalletAddress { set; get; }
@@ -37,6 +38,12 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 throw new Exception("Cash Out Queue Connection String should be present");
             if (string.IsNullOrWhiteSpace(CashOutQueue.Name))
                 throw new Exception("Cash Out Queue should be present");
+
+            if (string.IsNullOrWhiteSpace(Monitoring.Name))
+                throw new Exception("Monitoring Connection Name should be present");
+            if (string.IsNullOrWhiteSpace(Monitoring.ConnectionString))
+                throw new Exception("Monitoring Name should be present");
+
 
             if (string.IsNullOrWhiteSpace(TransitQueue.ConnectionString))
                 throw new Exception("Transit Queue Connection String should be present");

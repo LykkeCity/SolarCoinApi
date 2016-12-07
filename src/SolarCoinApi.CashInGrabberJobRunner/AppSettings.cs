@@ -13,6 +13,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
         public LoggerSettings Logger { set; get; }
         public MongoSettings Mongo { set; get; }
         public QueueSettings TransitQueue { set; get; }
+        public TableSettings Monitoring { set; get; }
         public bool VerboseLogging { set; get; }
         public int Threshold { get; set; }
         public int Period { get; set; }
@@ -36,9 +37,15 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 throw new Exception("Logger Warning Table Name should be present");
 
             if (string.IsNullOrWhiteSpace(TransitQueue.ConnectionString))
-                throw new Exception("Transit Queue Queue Connection String should be present");
+                throw new Exception("Transit Queue Connection String should be present");
             if (string.IsNullOrWhiteSpace(TransitQueue.Name))
                 throw new Exception("Transit Queue should be present");
+
+            if (string.IsNullOrWhiteSpace(Monitoring.Name))
+                throw new Exception("Monitoring Connection String should be present");
+            if (string.IsNullOrWhiteSpace(Monitoring.ConnectionString))
+                throw new Exception("Monitoring Name should be present");
+
 
             if (string.IsNullOrWhiteSpace(Mongo.CollectionName))
                 throw new Exception("Mongo Collection Name should be present");

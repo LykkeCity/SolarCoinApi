@@ -1,4 +1,4 @@
-﻿    using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SimpleInjector;
 using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.AzureStorage.Tables;
@@ -33,6 +33,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 
             container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.CashOutQueue.ConnectionString, settings.CashOutQueue.Name); }, Lifestyle.Singleton);
 
+            container.Register<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())), Lifestyle.Singleton);
+
             container.Register<IJsonRpcRawResponseFormatter, JsonRpcRawResponseFormatter>(Lifestyle.Singleton);
 
             container.Register<IJsonRpcRequestBuilder, JsonRpcRequestBuilder>(Lifestyle.Singleton);
@@ -60,6 +62,12 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                         settings.HotWalletAddress,
                         settings.TxFee,
                         settings.MinTxAmount), Lifestyle.Singleton);
+
+            container.Register<MonitoringJob>(() => new MonitoringJob(
+                    "SolarCoinApi.CashInHandler",
+                    container.GetInstance<IMonitoringRepository>(),
+                    container.GetInstance<ILog>()
+                    ), Lifestyle.Singleton);
 
             container.Register<QueueTriggerBinding>(Lifestyle.Singleton);
 

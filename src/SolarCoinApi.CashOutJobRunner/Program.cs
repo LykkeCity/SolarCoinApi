@@ -20,6 +20,8 @@ namespace SolarCoinApi.CashOutJobRunner
     {
         public static void Main(string[] args)
         {
+            MonitoringJob monitoringJob = null;
+
             try
             {
                 Console.Title = "SolarCoin CashOut job";
@@ -41,6 +43,11 @@ namespace SolarCoinApi.CashOutJobRunner
                 rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).Wait();
 
                 Console.WriteLine("The key was imported!");
+                
+                monitoringJob = container.GetInstance<MonitoringJob>();
+
+                monitoringJob.Start();
+
 
                 var triggerHost = new TriggerHost(container);
                 triggerHost.StartAndBlock();
@@ -53,6 +60,8 @@ namespace SolarCoinApi.CashOutJobRunner
             }
             catch (Exception e)
             {
+                monitoringJob?.Stop();
+
                 var err = e;
 
                 while (err != null)
