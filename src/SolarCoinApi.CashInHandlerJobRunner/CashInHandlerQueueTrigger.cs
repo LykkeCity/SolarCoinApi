@@ -38,46 +38,53 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         [QueueTrigger("solar-transit")]
         public async Task ReceiveMessage(TransitQueueMessage message)
         {
-            var ourVouts = new List<VoutEx>();
-
-            // get outputs that where dedicated to our users
-            for (int i = 0; i < message.Vouts.Count; i++)
+            try
             {
-                var vout = message.Vouts[i];
+                var ourVouts = new List<VoutEx>();
 
-                if (_generatedWallets.Any(x => x.Address == vout.Address))
+                // get outputs that where dedicated to our users
+                for (int i = 0; i < message.Vouts.Count; i++)
                 {
-                    ourVouts.Add(new VoutEx { Address = vout.Address, Amount = vout.Amount, voutId = i });
+                    var vout = message.Vouts[i];
+
+                    if (_generatedWallets.Any(x => x.Address == vout.Address))
+                    {
+                        ourVouts.Add(new VoutEx { Address = vout.Address, Amount = vout.Amount, voutId = i });
+                    }
                 }
-            }
 
-            // if none of the outputs where dedicated to our users, return;
-            if (ourVouts.Count == 0)
+                // if none of the outputs where dedicated to our users, return;
+                if (ourVouts.Count == 0)
+                {
+                    await _log.WriteWarning("", "", "", "didn't contain relevant addresses");
+                    return;
+                }
+
+
+                foreach (var addr in ourVouts.Select(x => x.Address).Distinct())
+                {
+                    var changePerAddress = ourVouts.Where(x => x.Address == addr).Sum(x => x.Amount);
+                    var changePerAddressInSlr = changePerAddress / 100000000m;
+
+                    if (changePerAddressInSlr < _minTxAmount)
+                        continue;
+
+                    var dest = new Dictionary<string, decimal> { { _hotWalletAddress, changePerAddressInSlr - _txFee } };
+
+                    var userWallet = _generatedWallets.FirstOrDefault(x => x.Address == addr);
+
+                    var rawTx = await _rpcClient.CreateRawTransaction(ourVouts.Where(x => x.Address == addr).Select(x => new { txid = message.TxId, vout = x.voutId }).ToArray(), dest);
+                    var signedTx = await _rpcClient.SignRawTransaction(rawTx, userWallet.PrivateKey);
+                    var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
+
+                    await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new QueueModel { Address = addr, Amount = changePerAddressInSlr, TxId = message.TxId }));
+                }
+
+            }
+            catch (Exception e)
             {
-                await _log.WriteWarning("", "", "", "didn't contain relevant addresses");
-                return;
+                await _log.WriteError("CashInHandlerQueueTrigger", "", "", e);
             }
-
-            
-            foreach(var addr in ourVouts.Select(x => x.Address).Distinct())
-            {
-                var changePerAddress = ourVouts.Where(x => x.Address == addr).Sum(x => x.Amount);
-                var changePerAddressInSlr = changePerAddress / 100000000m;
-
-                if (changePerAddressInSlr < _minTxAmount)
-                    continue;
-
-                var dest = new Dictionary<string, decimal> { { _hotWalletAddress, changePerAddressInSlr - _txFee } };
-
-                var userWallet = _generatedWallets.FirstOrDefault(x => x.Address == addr);
-
-                var rawTx = await _rpcClient.CreateRawTransaction(ourVouts.Where(x => x.Address == addr).Select(x => new { txid = message.TxId, vout = x.voutId }).ToArray(), dest);
-                var signedTx = await _rpcClient.SignRawTransaction(rawTx, userWallet.PrivateKey);
-                var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
-                
-                await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new QueueModel { Address = addr, Amount = changePerAddressInSlr, TxId = message.TxId }));
-            }
-
         }
     }
     public class VoutEx

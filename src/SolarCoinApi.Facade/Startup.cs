@@ -20,7 +20,7 @@ namespace SolarCoinApi.Facade
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IHostingEnvironment env, ConsoleArgs args)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -30,7 +30,8 @@ namespace SolarCoinApi.Facade
                 .AddJsonFile("appsettings.Release.json", optional: false, reloadOnChange: true);
 #endif
             //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-
+            
+            builder.AddCommandLine(args.Args);
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();

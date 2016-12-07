@@ -31,11 +31,11 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 
             container.Register<ILog>(() => { return new TableLogger(loggerOptions, settings.VerboseLogging); }, Lifestyle.Singleton);
 
-            container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.CashOutQueue.ConnectionString, settings.CashOutQueue.Name); }, Lifestyle.Transient);
+            container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.CashOutQueue.ConnectionString, settings.CashOutQueue.Name); }, Lifestyle.Singleton);
 
-            container.Register<IJsonRpcRawResponseFormatter, JsonRpcRawResponseFormatter>(Lifestyle.Transient);
+            container.Register<IJsonRpcRawResponseFormatter, JsonRpcRawResponseFormatter>(Lifestyle.Singleton);
 
-            container.Register<IJsonRpcRequestBuilder, JsonRpcRequestBuilder>(Lifestyle.Transient);
+            container.Register<IJsonRpcRequestBuilder, JsonRpcRequestBuilder>(Lifestyle.Singleton);
 
             var rawRpcClientOptions = new ConfigureOptions<RpcWalletGeneratorOptions>(x =>
             {
@@ -44,9 +44,9 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 x.Username = settings.Rpc.Username;
             });
 
-            container.Register<IJsonRpcClientRaw>(() => { return new JsonRpcClientRaw(container.GetInstance<IJsonRpcRequestBuilder>(), container.GetInstance<ILog>(), new OptionsManager<RpcWalletGeneratorOptions>(new List<IConfigureOptions<RpcWalletGeneratorOptions>>() { rawRpcClientOptions })); }, Lifestyle.Transient);
+            container.Register<IJsonRpcClientRaw>(() => { return new JsonRpcClientRaw(container.GetInstance<IJsonRpcRequestBuilder>(), container.GetInstance<ILog>(), new OptionsManager<RpcWalletGeneratorOptions>(new List<IConfigureOptions<RpcWalletGeneratorOptions>>() { rawRpcClientOptions })); }, Lifestyle.Singleton);
 
-            container.Register<IJsonRpcClient>(() => new JsonRpcClient(container.GetInstance<IJsonRpcClientRaw>(), container.GetInstance<IJsonRpcRawResponseFormatter>(), container.GetInstance<ILog>()), Lifestyle.Transient);
+            container.Register<IJsonRpcClient>(() => new JsonRpcClient(container.GetInstance<IJsonRpcClientRaw>(), container.GetInstance<IJsonRpcRawResponseFormatter>(), container.GetInstance<ILog>()), Lifestyle.Singleton);
 
             container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.TransitQueue.ConnectionString));
 
@@ -59,12 +59,11 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                         container.GetInstance<IJsonRpcClient>(),
                         settings.HotWalletAddress,
                         settings.TxFee,
-                        settings.MinTxAmount),
-                Lifestyle.Singleton);
+                        settings.MinTxAmount), Lifestyle.Singleton);
 
-            container.Register<QueueTriggerBinding>(Lifestyle.Transient);
+            container.Register<QueueTriggerBinding>(Lifestyle.Singleton);
 
-            container.Register<TransitQueueMessage>(Lifestyle.Transient);
+            //container.Register<TransitQueueMessage>(Lifestyle.Transient);
 
             container.Verify();
         }

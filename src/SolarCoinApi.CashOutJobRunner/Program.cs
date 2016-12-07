@@ -54,6 +54,7 @@ namespace SolarCoinApi.CashOutJobRunner
             catch (Exception e)
             {
                 var err = e;
+
                 while (err != null)
                 {
                     Console.WriteLine(err.Message);

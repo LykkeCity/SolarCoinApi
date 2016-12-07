@@ -52,7 +52,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 IMongoDatabase mongo = client.GetDatabase(settings.Mongo.DbName);
                 var collection = mongo.GetCollection<TransactionMongoEntity>(settings.Mongo.CollectionName);
 
-                container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.TransitQueue.ConnectionString, settings.TransitQueue.Name); }, Lifestyle.Transient);
+                container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.TransitQueue.ConnectionString, settings.TransitQueue.Name); }, Lifestyle.Singleton);
 
 
                 container.Register<CashInGrabberJob.CashInGrabberJob>(() => new CashInGrabberJob.CashInGrabberJob(
@@ -61,7 +61,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                     container.GetInstance<ILog>(),
                     collection,
                     container.GetInstance<IQueueExt>(),
-                    settings.Threshold));
+                    settings.Threshold), Lifestyle.Singleton);
 
                 var job = container.GetInstance<CashInGrabberJob.CashInGrabberJob>();
 

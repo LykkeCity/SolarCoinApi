@@ -18,6 +18,7 @@
     },
     "SolarCoinApi.Facade2": {
       "commandName": "Project",
+      "commandLineArgs": "asdf=eee",
       "launchBrowser": true,
       "launchUrl": "http://localhost:5000/api/GenerateWallet",
       "environmentVariables": {

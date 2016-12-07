@@ -29,16 +29,23 @@ namespace SolarCoinApi.CashOutJobRunner
         [QueueTrigger("solar-out")]
         public async Task ReceiveMessage(ToSendMessageFromQueue message)
         {
-            await _log.WriteInfo("", "", "", $"Cash out request grabbed: Address: '{message.Address}', Amount: {message.Amount}");
+            try
+            {
+                await _log.WriteInfo("", "", "", $"Cash out request grabbed: Address: '{message.Address}', Amount: {message.Amount}");
 
-            if (_existingTxes.Any(x => x.RowKey == message.Id))
-                return;
+                if (_existingTxes.Any(x => x.RowKey == message.Id))
+                    return;
 
-            await _existingTxes.InsertAsync(new ExistingCashOutEntity { PartitionKey = "part", RowKey = message.Id });
+                await _existingTxes.InsertAsync(new ExistingCashOutEntity { PartitionKey = "part", RowKey = message.Id });
 
-            var resultTxId = await _rpcClient.SendToAddress(message.Address, message.Amount);
+                var resultTxId = await _rpcClient.SendToAddress(message.Address, message.Amount);
+
+                await _log.WriteInfo("", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
+            } catch (Exception e)
+            {
+                await _log.WriteError("CashOutQueueTrigger", "", "", e);
+            }
             
-            await _log.WriteInfo("", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
         }
     }
 

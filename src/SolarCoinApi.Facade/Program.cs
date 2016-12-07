@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SolarCoinApi.Facade
 {
@@ -18,9 +19,20 @@ namespace SolarCoinApi.Facade
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
+                .ConfigureServices(services => services
+                    .AddSingleton(new ConsoleArgs(args)))
                 .Build();
 
             host.Run();
         }
+    }
+
+    public class ConsoleArgs
+    {
+        public ConsoleArgs(string[] args)
+        {
+            Args = args;
+        }
+        public string[] Args { get; }
     }
 }
