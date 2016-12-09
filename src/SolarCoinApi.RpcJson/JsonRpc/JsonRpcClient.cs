@@ -132,6 +132,7 @@ namespace SolarCoinApi.RpcJson.JsonRpc
         Task<string> SendRawTransaction(string hex);
         Task<string> SendToAddress(string address, decimal amount);
         Task<ImportPrivateKeyResponseModel> ImportPrivateKey(string privkey);
+        Task<int> GetBlockCount();
     }
 
     public class JsonRpcClient : IJsonRpcClient
@@ -156,6 +157,11 @@ namespace SolarCoinApi.RpcJson.JsonRpc
         public Task<string> CreateRawTransaction(object[] inputs, Dictionary<string, decimal> to)
         {
             return this.Invoke<string>("createrawtransaction", inputs, to);
+        }
+
+        public Task<int> GetBlockCount()
+        {
+            return this.Invoke<int>("getblockcount");
         }
 
         public Task<SignRawTransactionResponseModel> SignRawTransaction(string hex, string privateKey)

@@ -45,7 +45,6 @@ namespace SolarCoinApi.CashOutJobRunner
                 Console.WriteLine("The key was imported!");
                 
                 monitoringJob = container.GetInstance<MonitoringJob>();
-
                 monitoringJob.Start();
 
 

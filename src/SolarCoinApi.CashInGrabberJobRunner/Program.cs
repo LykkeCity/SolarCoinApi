@@ -35,49 +35,14 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 #elif RELEASE
                 var settings = new AppSettings<CashInGrabberSettings>().LoadFile("appsettings.Release.json");
 #endif
-
-                IConfigureOptions<LoggerOptions> configureOptions = new ConfigureOptions<LoggerOptions>(x =>
-                {
-                    x.ConnectionString = settings.Logger.ConnectionString;
-                    x.ErrorTableName = settings.Logger.ErrorTableName;
-                    x.InfoTableName = settings.Logger.InfoTableName;
-                    x.WarningTableName = settings.Logger.WarningTableName;
-                });
-
-                var loggerOptions = new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions });
-
-                container.Register<ILog>(() => { return new TableLogger(loggerOptions, settings.VerboseLogging); }, Lifestyle.Singleton);
-
+                Bootrsrap.Start(container, settings);
 
                 BsonClassMap.RegisterClassMap<TransactionMongoEntity>();
-                var client = new MongoClient($"{settings.Mongo.Host}:{settings.Mongo.Port}");
-                IMongoDatabase mongo = client.GetDatabase(settings.Mongo.DbName);
-                var collection = mongo.GetCollection<TransactionMongoEntity>(settings.Mongo.CollectionName);
-
-                container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.TransitQueue.ConnectionString, settings.TransitQueue.Name); }, Lifestyle.Singleton);
-
-                container.Register<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())), Lifestyle.Singleton);
-
-                container.Register<CashInGrabberJob.CashInGrabberJob>(() => new CashInGrabberJob.CashInGrabberJob(
-                    "CashInGrabber",
-                    settings.Period,
-                    container.GetInstance<ILog>(),
-                    collection,
-                    container.GetInstance<IQueueExt>(),
-                    settings.Threshold), Lifestyle.Singleton);
-
-                container.Register<MonitoringJob>(() => new MonitoringJob(
-                    "SolarCoinApi.CashInGrabber",
-                    container.GetInstance<IMonitoringRepository>(),
-                    container.GetInstance<ILog>()
-                    ), Lifestyle.Singleton);
 
                 var job = container.GetInstance<CashInGrabberJob.CashInGrabberJob>();
-
                 job.Start();
 
                 monitoringJob = container.GetInstance<MonitoringJob>();
-
                 monitoringJob.Start();
 
                 Console.WriteLine("The job has started! Enter 'q' to quit...");

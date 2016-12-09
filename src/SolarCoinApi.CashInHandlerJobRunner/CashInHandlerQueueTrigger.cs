@@ -57,7 +57,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 // if none of the outputs where dedicated to our users, return;
                 if (ourVouts.Count == 0)
                 {
-                    await _log.WriteWarning("", "", "", "didn't contain relevant addresses");
+                    await _log.WriteWarning("CashInHandlerQueueTrigger", "", "", "didn't contain relevant addresses");
                     return;
                 }
 
@@ -84,8 +84,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             }
             catch (Exception e)
             {
-                await _log.WriteError("CashInHandlerQueueTrigger", "", "", e);
-                throw;
+                await _log.WriteError("CashInHandlerQueueTrigger", "", message.TxId, e);
             }
         }
     }

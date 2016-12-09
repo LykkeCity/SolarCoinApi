@@ -1,36 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SolarCoinApi.AzureStorage;
 using SolarCoinApi.AzureStorage.Tables;
 using SolarCoinApi.Core;
 using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SolarCoinApi.Common
 {
-    public class TableLogger : ILog
+    public class TableLogger1 : ILog
     {
         private readonly INoSQLTableStorage<LogEntity> _errorTableStorage;
         private readonly INoSQLTableStorage<LogEntity> _warningTableStorage;
         private readonly INoSQLTableStorage<LogEntity> _infoTableStorage;
-        private readonly IOptions<LoggerOptions> _options;
+        private readonly LoggerOptions _options;
         private bool _verbose;
 
-        public TableLogger(IOptions<LoggerOptions> options, bool verbose = false)
+        public TableLogger1(LoggerOptions options, bool verbose = false)
         {
             _options = options;
 
-            _errorTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.ErrorTableName, null);
-            _warningTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.WarningTableName, null);
-            _infoTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.InfoTableName, null);
+            _errorTableStorage = new AzureTableStorage<LogEntity>(_options.ConnectionString, _options.ErrorTableName, null);
+            _warningTableStorage = new AzureTableStorage<LogEntity>(_options.ConnectionString, _options.WarningTableName, null);
+            _infoTableStorage = new AzureTableStorage<LogEntity>(_options.ConnectionString, _options.InfoTableName, null);
 
             _verbose = verbose;
         }
 
-        
+        public TableLogger1(INoSQLTableStorage<LogEntity> storage, bool verbose = false)
+        {
+            _errorTableStorage = storage;
+            _warningTableStorage = storage;
+            _infoTableStorage = storage;
+        }
+
+
         private async Task Insert(string level, string component, string process, string context, string type, string stack,
             string msg, DateTime? dateTime)
         {

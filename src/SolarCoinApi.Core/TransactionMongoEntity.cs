@@ -1,10 +1,10 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization.Attributes;
 
-namespace SolarCoinApi.CashInGrabberJob
+namespace SolarCoinApi.Core
 {
     public class MongoEntity
     {
@@ -17,8 +17,8 @@ namespace SolarCoinApi.CashInGrabberJob
     {
         public TransactionMongoEntity()
         {
-            Vouts = new List<Vout>();
-            Vins = new List<Vin>();
+            Vouts = new List<MongoVout>();
+            Vins = new List<MongoVin>();
         }
 
         [BsonElement("txid")]
@@ -37,16 +37,16 @@ namespace SolarCoinApi.CashInGrabberJob
         public decimal Total { set; get; }
 
         [BsonElement("vout")]
-        public List<Vout> Vouts { set; get; }
+        public List<MongoVout> Vouts { set; get; }
 
         [BsonElement("vin")]
-        public List<Vin> Vins { set; get; }
+        public List<MongoVin> Vins { set; get; }
 
         [BsonElement("wasprocessed")]
         public bool WasProcessed { set; get; }
     }
 
-    public class Vout
+    public class MongoVout
     {
         [BsonElement("amount")]
         public long Amount { set; get; }
@@ -55,7 +55,7 @@ namespace SolarCoinApi.CashInGrabberJob
         public string Addresses { set; get; }
     }
 
-    public class Vin
+    public class MongoVin
     {
         [BsonElement("amount")]
         public long Amount { set; get; }

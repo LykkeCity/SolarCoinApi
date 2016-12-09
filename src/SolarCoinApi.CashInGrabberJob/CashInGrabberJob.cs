@@ -25,20 +25,7 @@ namespace SolarCoinApi.CashInGrabberJob
             _threshold = threshold;
             _normalPeriodMs = periodMs;
         }
-
-        private TransitQueueMessage ProduceTransitQueueMessage(TransactionMongoEntity entity)
-        {
-            var result = new TransitQueueMessage { TxId = entity.TxId };
-
-            foreach(var vin in entity.Vins)
-                result.Vins.Add(new Core.Vin { Address = vin.Addresses, Amount = vin.Amount });
-
-            foreach (var vout in entity.Vouts)
-                result.Vouts.Add(new Core.Vout { Address = vout.Addresses, Amount = vout.Amount });
-
-            return result;
-        }
-
+        
         public override async Task Execute()
         {
             var newTxes = _blockchainExplorer.Find(Builders<TransactionMongoEntity>.Filter.Exists(d => d.WasProcessed, false))
@@ -66,7 +53,7 @@ namespace SolarCoinApi.CashInGrabberJob
 
             foreach(var tx in newTxes)
             {
-                await _transitQueue.PutRawMessageAsync(JsonConvert.SerializeObject(ProduceTransitQueueMessage(tx)));
+                await _transitQueue.PutRawMessageAsync(JsonConvert.SerializeObject(tx.ToTransitQueueMessage()));
 
                 var filter = Builders<TransactionMongoEntity>.Filter.Eq("txid", tx.TxId);
 
@@ -77,6 +64,22 @@ namespace SolarCoinApi.CashInGrabberJob
 
             await _log.WriteInfo(GetComponentName(), "", "", $"{newTxes.Count()} tx-es successfully processed!");
 
+        }
+    }
+
+    public static class Helper
+    {
+        public static TransitQueueMessage ToTransitQueueMessage(this TransactionMongoEntity entity)
+        {
+            var result = new TransitQueueMessage { TxId = entity.TxId };
+
+            foreach (var vin in entity.Vins)
+                result.Vins.Add(new Vin { Address = vin.Addresses, Amount = vin.Amount });
+
+            foreach (var vout in entity.Vouts)
+                result.Vouts.Add(new Vout { Address = vout.Addresses, Amount = vout.Amount });
+
+            return result;
         }
     }
 }

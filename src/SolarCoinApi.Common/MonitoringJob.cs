@@ -29,9 +29,7 @@ namespace SolarCoinApi.Common
 
         public override async Task Execute()
         {
-            Console.WriteLine("executing");
             await _repository.SaveAsync(new Monitoring { DateTime = DateTime.UtcNow, ServiceName = _component });
-            Console.WriteLine("executed");
         }
     }
 }

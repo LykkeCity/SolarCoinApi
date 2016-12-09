@@ -31,7 +31,7 @@ namespace SolarCoinApi.CashOutJobRunner
         {
             try
             {
-                await _log.WriteInfo("", "", "", $"Cash out request grabbed: Address: '{message.Address}', Amount: {message.Amount}");
+                await _log.WriteInfo("CashOutQueueTrigger", "", message.Id, $"Cash out request grabbed: Address: '{message.Address}', Amount: {message.Amount}");
 
                 if (_existingTxes.Any(x => x.RowKey == message.Id))
                     return;
@@ -40,11 +40,11 @@ namespace SolarCoinApi.CashOutJobRunner
 
                 var resultTxId = await _rpcClient.SendToAddress(message.Address, message.Amount);
 
-                await _log.WriteInfo("", "", "", $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
-            } catch (Exception e)
+                await _log.WriteInfo("CashOutQueueTrigger", "", message.Id, $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
+            }
+            catch (Exception e)
             {
-                await _log.WriteError("CashOutQueueTrigger", "", "", e);
-                throw;
+                await _log.WriteError("CashOutQueueTrigger", "", message.Id, e);
             }
             
         }
