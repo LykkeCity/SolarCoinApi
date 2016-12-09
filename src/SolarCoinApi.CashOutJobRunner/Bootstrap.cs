@@ -31,8 +31,6 @@ namespace SolarCoinApi.CashOutJobRunner
 
             container.Register<ILog>(() => { return new TableLogger(loggerOptions, settings.VerboseLogging); }, Lifestyle.Singleton);
 
-            //container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.Queue.ConnectionString, settings.Queue.Name); }, Lifestyle.Transient);
-
             container.Register<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())), Lifestyle.Singleton);
 
             container.Register<IJsonRpcRawResponseFormatter, JsonRpcRawResponseFormatter>(Lifestyle.Singleton);
@@ -69,8 +67,6 @@ namespace SolarCoinApi.CashOutJobRunner
                     ), Lifestyle.Singleton);
 
             container.Register<QueueTriggerBinding>(Lifestyle.Singleton);
-
-            //container.Register<ToSendMessageFromQueue>(Lifestyle.Transient);
 
             container.Verify();
         }

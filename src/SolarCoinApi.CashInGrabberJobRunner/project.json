@@ -18,8 +18,7 @@
     "SimpleInjector": "3.3.1",
     "SolarCoinApi.Common": "1.0-*",
     "MongoDB.Driver": "2.3.0",
-    "SolarCoinApi.Core": "1.0.0-*",
-    "SolarCoinApi.CashInGrabberJob": "1.0.0-*"
+    "SolarCoinApi.Core": "1.0.0-*"
   },
 
   "frameworks": {

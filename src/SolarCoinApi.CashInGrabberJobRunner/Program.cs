@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SolarCoinApi.CashInGrabberJob;
 using SolarCoinApi.Core.Options;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -39,7 +38,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
                 BsonClassMap.RegisterClassMap<TransactionMongoEntity>();
 
-                var job = container.GetInstance<CashInGrabberJob.CashInGrabberJob>();
+                var job = container.GetInstance<CashInGrabberJob>();
                 job.Start();
 
                 monitoringJob = container.GetInstance<MonitoringJob>();

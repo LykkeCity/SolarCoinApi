@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using System;
 
-namespace SolarCoinApi.CashInGrabberJob
+namespace SolarCoinApi.CashInGrabberJobRunner
 {
     public class CashInGrabberJob : TimerPeriodEx
     {
@@ -74,22 +74,6 @@ namespace SolarCoinApi.CashInGrabberJob
                 await _slackNotifier.Notify(new SlackMessage { Sender = "CashInGrabberJob", Type = "Error", Message = "Error occured during transfer from mongo" });
                 throw;
             }
-        }
-    }
-
-    public static class Helper
-    {
-        public static TransitQueueMessage ToTransitQueueMessage(this TransactionMongoEntity entity)
-        {
-            var result = new TransitQueueMessage { TxId = entity.TxId };
-
-            foreach (var vin in entity.Vins)
-                result.Vins.Add(new Vin { Address = vin.Addresses, Amount = vin.Amount });
-
-            foreach (var vout in entity.Vouts)
-                result.Vouts.Add(new Vout { Address = vout.Addresses, Amount = vout.Amount });
-
-            return result;
         }
     }
 }

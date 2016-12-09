@@ -40,7 +40,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
             container.Register<ISlackNotifier>(() => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name)), Lifestyle.Singleton);
 
-            container.Register<CashInGrabberJob.CashInGrabberJob>(() => new CashInGrabberJob.CashInGrabberJob(
+            container.Register<CashInGrabberJob>(() => new CashInGrabberJob(
                 "CashInGrabber",
                 settings.Period,
                 container.GetInstance<ILog>(),

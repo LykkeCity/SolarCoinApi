@@ -29,7 +29,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 
             var loggerOptions = new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions });
 
-            container.Register<ILog>(() => { return new TableLogger(loggerOptions, settings.VerboseLogging); }, Lifestyle.Singleton);
+            container.RegisterSingleton<ILog>(() => { return new TableLogger(loggerOptions, settings.VerboseLogging); });
 
             container.RegisterSingleton<IQueueExt>(() => { return new AzureQueueExt(settings.CashInQueue.ConnectionString, settings.CashInQueue.Name); });
 
@@ -69,13 +69,10 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             container.RegisterSingleton<MonitoringJob>(() => new MonitoringJob(
                     "SolarCoinApi.CashInHandler",
                     container.GetInstance<IMonitoringRepository>(),
-                    container.GetInstance<ILog>()
-                    ));
+                    container.GetInstance<ILog>()));
 
             container.RegisterSingleton<QueueTriggerBinding>();
-
-            //container.Register<TransitQueueMessage>(Lifestyle.Transient);
-
+            
             container.Verify();
         }
     }
