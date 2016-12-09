@@ -14,6 +14,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         public QueueSettings CashInQueue { set; get; }
         public TableSettings Monitoring { set; get; }
         public QueueSettings TransitQueue { set; get; }
+        public QueueSettings SlackQueue { set; get; }
         public RpcSettings Rpc { set; get; }
         public string HotWalletAddress { set; get; }
         public decimal TxFee { set; get; }
@@ -38,6 +39,11 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 throw new Exception("Cash In Queue Connection String should be present");
             if (string.IsNullOrWhiteSpace(CashInQueue.Name))
                 throw new Exception("Cash In Queue should be present");
+
+            if (string.IsNullOrWhiteSpace(SlackQueue.ConnectionString))
+                throw new Exception("Slack Queue Connection String should be present");
+            if (string.IsNullOrWhiteSpace(SlackQueue.Name))
+                throw new Exception("Slack Queue Name should be present");
 
             if (string.IsNullOrWhiteSpace(Monitoring.Name))
                 throw new Exception("Monitoring Connection Name should be present");

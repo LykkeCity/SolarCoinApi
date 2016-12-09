@@ -43,8 +43,10 @@ namespace SolarCoinApi.Tests.CashInHandlerJobRunner
             fakeRpcClient.SignRawTransaction(Arg.Any<string>(), Arg.Any<string>()).Returns(new SignRawTransactionResponseModel());
             fakeRpcClient.SendRawTransaction(Arg.Any<string>()).Returns("string");
 
+            var fakeSlackNotifier = Substitute.For<ISlackNotifier>();
 
-            var queueTrigger = new CashInHandlerQueueTrigger(generatedWallets, null, fakeTxesQueue, fakeRpcClient, hotWalletAddress, txFee, minTxAmount);
+
+            var queueTrigger = new CashInHandlerQueueTrigger(generatedWallets, null, fakeTxesQueue, fakeRpcClient, fakeSlackNotifier, hotWalletAddress, txFee, minTxAmount);
 
 
 

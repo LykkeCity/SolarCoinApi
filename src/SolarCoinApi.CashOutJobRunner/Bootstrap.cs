@@ -52,10 +52,13 @@ namespace SolarCoinApi.CashOutJobRunner
 
             container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.Queue.ConnectionString), Lifestyle.Singleton);
 
+            container.Register<ISlackNotifier>(() => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name)), Lifestyle.Singleton);
+
             container.Register<CashOutQueueTrigger>(() => new CashOutQueueTrigger(
                 container.GetInstance<IJsonRpcClient>(),
                 new AzureTableStorage<ExistingCashOutEntity>(settings.ExistingTxes.ConnectionString, settings.ExistingTxes.Name, container.GetInstance<ILog>()),
-                container.GetInstance<ILog>()
+                container.GetInstance<ILog>(),
+                container.GetInstance<ISlackNotifier>()
                 ), Lifestyle.Singleton);
 
 

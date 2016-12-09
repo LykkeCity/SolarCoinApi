@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SolarCoinApi.AzureStorage.Tables;
 using System.Collections.Generic;
 using System.Linq;
+using SolarCoinApi.Core;
 
 namespace SolarCoinApi.Tests.CashOutJobRunner
 {
@@ -31,7 +32,10 @@ namespace SolarCoinApi.Tests.CashOutJobRunner
 
             var fakeLogger = Substitute.For<ILog>();
 
-            var queueTrigger = new CashOutQueueTrigger(fakeRpcClient, fakeTxesStorage, fakeLogger);
+
+            var fakeSlackNotifier = Substitute.For<ISlackNotifier>();
+
+            var queueTrigger = new CashOutQueueTrigger(fakeRpcClient, fakeTxesStorage, fakeLogger, fakeSlackNotifier);
 
 
             //Act
@@ -65,7 +69,9 @@ namespace SolarCoinApi.Tests.CashOutJobRunner
 
             var fakeLogger = Substitute.For<ILog>();
 
-            var queueTrigger = new CashOutQueueTrigger(fakeRpcClient, fakeTxesStorage, fakeLogger);
+            var fakeSlackNotifier = Substitute.For<ISlackNotifier>();
+
+            var queueTrigger = new CashOutQueueTrigger(fakeRpcClient, fakeTxesStorage, fakeLogger, fakeSlackNotifier);
 
 
             //Act

@@ -40,7 +40,7 @@ namespace SolarCoinApi.CashOutJobRunner
                 
                 Console.WriteLine("Importing private key to the local node - this may take up to several minutes...");
 
-                rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).Wait();
+                //rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).Wait();
 
                 Console.WriteLine("The key was imported!");
                 

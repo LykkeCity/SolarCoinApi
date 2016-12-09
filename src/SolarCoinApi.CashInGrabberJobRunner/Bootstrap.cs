@@ -38,12 +38,15 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
             container.Register<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())), Lifestyle.Singleton);
 
+            container.Register<ISlackNotifier>(() => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name)), Lifestyle.Singleton);
+
             container.Register<CashInGrabberJob.CashInGrabberJob>(() => new CashInGrabberJob.CashInGrabberJob(
                 "CashInGrabber",
                 settings.Period,
                 container.GetInstance<ILog>(),
                 collection,
                 container.GetInstance<IQueueExt>(),
+                container.GetInstance<ISlackNotifier>(),
                 settings.Threshold), Lifestyle.Singleton);
 
             container.Register<MonitoringJob>(() => new MonitoringJob(

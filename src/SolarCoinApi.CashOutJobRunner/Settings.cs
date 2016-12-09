@@ -17,6 +17,7 @@ namespace SolarCoinApi.CashOutJobRunner
         public bool VerboseLogging { set; get; }
         public string HotWalletPrivKey { set; get; }
         public QueueSettings Queue { set; get; }
+        public QueueSettings SlackQueue { set; get; }
         public TableSettings Monitoring { set; get; }
         public TableSettings ExistingTxes { set; get; }
         public LoggerSettings Logger { set; get; }
@@ -45,6 +46,11 @@ namespace SolarCoinApi.CashOutJobRunner
                 throw new Exception("Monitoring Connection Name should be present");
             if (string.IsNullOrWhiteSpace(Monitoring.ConnectionString))
                 throw new Exception("Monitoring Name should be present");
+
+            if (string.IsNullOrWhiteSpace(SlackQueue.ConnectionString))
+                throw new Exception("Slack Queue Connection String should be present");
+            if (string.IsNullOrWhiteSpace(SlackQueue.Name))
+                throw new Exception("Slack Queue Name should be present");
 
             if (string.IsNullOrWhiteSpace(Queue.ConnectionString))
                 throw new Exception("Queue Connection String should be present");

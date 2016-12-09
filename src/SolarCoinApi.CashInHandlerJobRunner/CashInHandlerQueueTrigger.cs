@@ -19,12 +19,13 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         private ILog _log;
         private IQueueExt _txesQueue;
         private IJsonRpcClient _rpcClient;
+        private ISlackNotifier _slackNotifier;
         private string _hotWalletAddress;
         private decimal _txFee;
         private decimal _minTxAmount;
 
         public CashInHandlerQueueTrigger(INoSQLTableStorage<WalletStorageEntity> generatedWallets, ILog log, IQueueExt txesQueue,
-            IJsonRpcClient rpcClient, string hotWalletAddress, decimal txFee, decimal minTxAmount)
+            IJsonRpcClient rpcClient, ISlackNotifier slackNotifier, string hotWalletAddress, decimal txFee, decimal minTxAmount)
         {
             _generatedWallets = generatedWallets;
             _log = log;
@@ -33,6 +34,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             _hotWalletAddress = hotWalletAddress;
             _txFee = txFee;
             _minTxAmount = minTxAmount;
+            _slackNotifier = slackNotifier;
         }
         
         [QueueTrigger("solar-transit")]
@@ -40,7 +42,6 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         {
             try
             {
-
                 var ourVouts = new List<VoutEx>();
 
                 // get outputs that where dedicated to our users
@@ -85,6 +86,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             catch (Exception e)
             {
                 await _log.WriteError("CashInHandlerQueueTrigger", "", message.TxId, e);
+                await _slackNotifier.Notify(new SlackMessage { Sender = "CashInHandlerQueueTrigger", Type = "Error", Message = "Error occured during cashin handling" });
+                throw;
             }
         }
     }

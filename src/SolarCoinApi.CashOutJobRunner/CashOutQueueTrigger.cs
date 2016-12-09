@@ -4,6 +4,7 @@ using SolarCoinApi.AzureStorage;
 using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.CashOutJobRunner;
 using SolarCoinApi.Common.Triggers.Attributes;
+using SolarCoinApi.Core;
 using SolarCoinApi.Core.Log;
 using SolarCoinApi.RpcJson.JsonRpc;
 using System;
@@ -18,12 +19,14 @@ namespace SolarCoinApi.CashOutJobRunner
         private IJsonRpcClient _rpcClient;
         private INoSQLTableStorage<ExistingCashOutEntity> _existingTxes;
         private ILog _log;
+        private ISlackNotifier _slackNotifier;
 
-        public CashOutQueueTrigger(IJsonRpcClient rpcClient, INoSQLTableStorage<ExistingCashOutEntity> existingTxes, ILog log)
+        public CashOutQueueTrigger(IJsonRpcClient rpcClient, INoSQLTableStorage<ExistingCashOutEntity> existingTxes, ILog log, ISlackNotifier slackNotifier)
         {
             _rpcClient = rpcClient;
             _existingTxes = existingTxes;
             _log = log;
+            _slackNotifier = slackNotifier;
         }
 
         [QueueTrigger("solar-out")]
@@ -45,8 +48,9 @@ namespace SolarCoinApi.CashOutJobRunner
             catch (Exception e)
             {
                 await _log.WriteError("CashOutQueueTrigger", "", message.Id, e);
+                await _slackNotifier.Notify(new SlackMessage { Sender = "CashOutQueueTrigger", Type = "Error", Message = "Error occured during cashout" });
+                throw;
             }
-            
         }
     }
 

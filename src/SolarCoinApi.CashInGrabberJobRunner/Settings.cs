@@ -13,6 +13,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
         public LoggerSettings Logger { set; get; }
         public MongoSettings Mongo { set; get; }
         public QueueSettings TransitQueue { set; get; }
+        public QueueSettings SlackQueue { set; get; }
         public TableSettings Monitoring { set; get; }
         public bool VerboseLogging { set; get; }
         public int Threshold { get; set; }
@@ -40,6 +41,11 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 throw new Exception("Transit Queue Connection String should be present");
             if (string.IsNullOrWhiteSpace(TransitQueue.Name))
                 throw new Exception("Transit Queue should be present");
+
+            if (string.IsNullOrWhiteSpace(SlackQueue.ConnectionString))
+                throw new Exception("Slack Queue Connection String should be present");
+            if (string.IsNullOrWhiteSpace(SlackQueue.Name))
+                throw new Exception("Slack Queue Name should be present");
 
             if (string.IsNullOrWhiteSpace(Monitoring.Name))
                 throw new Exception("Monitoring Connection String should be present");

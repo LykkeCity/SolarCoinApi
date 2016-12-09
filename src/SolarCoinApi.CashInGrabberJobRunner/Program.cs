@@ -66,9 +66,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                     err = err.InnerException;
                 }
 
-#if DEBUG
                 Console.ReadKey();
-#endif
             }
         }
     }

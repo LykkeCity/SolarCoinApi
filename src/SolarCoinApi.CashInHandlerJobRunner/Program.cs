@@ -32,10 +32,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 Bootrsrap.Start(container, settings);
 
                 monitoringJob = container.GetInstance<MonitoringJob>();
-
                 monitoringJob.Start();
-
-
+                
                 var triggerHost = new TriggerHost(container);
                 triggerHost.StartAndBlock();
 
