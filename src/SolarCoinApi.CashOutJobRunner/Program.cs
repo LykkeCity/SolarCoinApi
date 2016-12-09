@@ -40,7 +40,7 @@ namespace SolarCoinApi.CashOutJobRunner
                 
                 Console.WriteLine("Importing private key to the local node - this may take up to several minutes...");
 
-                //rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).Wait();
+                rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).Wait();
 
                 Console.WriteLine("The key was imported!");
                 
@@ -56,6 +56,27 @@ namespace SolarCoinApi.CashOutJobRunner
                 while (Console.ReadLine() != "q")
                     continue;
 
+            }
+            catch(AggregateException ae)
+            {
+                monitoringJob?.Stop();
+
+                foreach(var e in ae.InnerExceptions)
+                {
+                    var err = e;
+
+                    while (err != null)
+                    {
+                        Console.WriteLine(err.Message);
+                        Console.WriteLine();
+                        Console.WriteLine("Stack trace:");
+                        Console.WriteLine(err.StackTrace);
+
+                        err = err.InnerException;
+                    }
+                }
+
+                Console.ReadKey();
             }
             catch (Exception e)
             {

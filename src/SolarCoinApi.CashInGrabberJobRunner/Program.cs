@@ -34,10 +34,10 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 #elif RELEASE
                 var settings = new AppSettings<CashInGrabberSettings>().LoadFile("appsettings.Release.json");
 #endif
-                Bootrsrap.Start(container, settings);
-
                 BsonClassMap.RegisterClassMap<TransactionMongoEntity>();
 
+                Bootrsrap.Start(container, settings);
+                
                 var job = container.GetInstance<CashInGrabberJob>();
                 job.Start();
 
