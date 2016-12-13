@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using SolarCoinApi.AzureStorage.Queue;
-using SolarCoinApi.AzureStorage.Tables;
-using SolarCoinApi.CashOutJobRunner;
 using SolarCoinApi.Common;
-using SolarCoinApi.Core;
-using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson.JsonRpc;
 using SimpleInjector;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Common.Triggers;
+using System.Runtime.Loader;
+using System.Threading;
 
 namespace SolarCoinApi.CashOutJobRunner
 {
@@ -46,57 +38,31 @@ namespace SolarCoinApi.CashOutJobRunner
                 
                 monitoringJob = container.GetInstance<MonitoringJob>();
                 monitoringJob.Start();
-
-
-                var triggerHost = new TriggerHost(container);
-                triggerHost.StartAndBlock();
                 
-                Console.WriteLine("The job has started! Enter 'q' to quit...");
+                var triggerHost = new TriggerHost(container);
 
-                while (Console.ReadLine() != "q")
-                    continue;
+                var end = new ManualResetEvent(false);
 
+                AssemblyLoadContext.Default.Unloading += ctx =>
+                {
+                    Console.WriteLine("SIGTERM recieved");
+                    triggerHost.Cancel();
+
+                    end.WaitOne();
+                };
+
+                triggerHost.StartAndBlock();
+
+                end.Set();
             }
-            catch(AggregateException ae)
+            catch(Exception e)
             {
                 monitoringJob?.Stop();
 
-                foreach(var e in ae.InnerExceptions)
-                {
-                    var err = e;
-
-                    while (err != null)
-                    {
-                        Console.WriteLine(err.Message);
-                        Console.WriteLine();
-                        Console.WriteLine("Stack trace:");
-                        Console.WriteLine(err.StackTrace);
-
-                        err = err.InnerException;
-                    }
-                }
+                e.PrintToConsole();
 
                 Console.ReadKey();
             }
-            catch (Exception e)
-            {
-                monitoringJob?.Stop();
-
-                var err = e;
-
-                while (err != null)
-                {
-                    Console.WriteLine(err.Message);
-                    Console.WriteLine();
-                    Console.WriteLine("Stack trace:");
-                    Console.WriteLine(err.StackTrace);
-
-                    err = err.InnerException;
-                }
-
-                Console.ReadKey();
-            }
-
 
         }
     }

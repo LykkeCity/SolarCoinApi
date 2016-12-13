@@ -24,6 +24,8 @@ namespace SolarCoinApi.Core.Timers
 
         public bool Working { get; private set; }
 
+        public Task CurrentIteration { get; private set; }
+
         private void LogFatalError(Exception exception)
         {
             try
@@ -43,7 +45,8 @@ namespace SolarCoinApi.Core.Timers
             {
                 try
                 {
-                    await Execute();
+                    CurrentIteration = Execute();
+                    await CurrentIteration;
                 }
                 catch (Exception exception)
                 {

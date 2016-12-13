@@ -3,10 +3,8 @@ using System.Threading.Tasks;
 using SolarCoinApi.Core.Log;
 using MongoDB.Driver;
 using SolarCoinApi.AzureStorage.Queue;
-using MongoDB.Driver.Linq;
 using System.Linq;
 using SolarCoinApi.Core;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using System;
 

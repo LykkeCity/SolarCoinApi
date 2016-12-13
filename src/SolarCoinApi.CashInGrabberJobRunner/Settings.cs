@@ -27,6 +27,10 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 throw new Exception("Mongo section should be present");
             if (TransitQueue == null)
                 throw new Exception("Transit Queue section should be present");
+            if (SlackQueue == null)
+                throw new Exception("Slack Queue section should be present");
+            if (Monitoring == null)
+                throw new Exception("Monitoring section should be present");
 
             if (string.IsNullOrWhiteSpace(Logger.ConnectionString))
                 throw new Exception("Logger Connection String should be present");

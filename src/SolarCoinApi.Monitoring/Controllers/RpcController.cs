@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using SolarCoinApi.RpcJson.JsonRpc;
 using System.Net.Http;
+using SolarCoinApi.Core.Log;
 
 namespace SolarCoinApi.Monitoring.Controllers
 {
@@ -13,11 +14,12 @@ namespace SolarCoinApi.Monitoring.Controllers
     public class RpcController : Controller
     {
         private IJsonRpcClient _client;
+        private ILog _logger;
 
-
-        public RpcController(IJsonRpcClient client)
+        public RpcController(IJsonRpcClient client, ILog logger)
         {
             _client = client;
+            _logger = logger;
         }
 
         /// <summary>
@@ -25,26 +27,28 @@ namespace SolarCoinApi.Monitoring.Controllers
         /// </summary>
         /// <returns>General info</returns>
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
                 var resp = new RpcResponseModel();
 
-                var count = _client.GetBlockCount().Result;
+                var count = await _client.GetBlockCount();
 
                 resp.RpcBlockCount = count;
                 resp.RpcIsAlive = true;
 
                 return Json(resp);
             }
-            catch (AggregateException e)
+            catch (HttpRequestException e)
             {
-                if (e.InnerExceptions.Any(x => x is HttpRequestException))
-                    return Json(new RpcResponseModel { RpcIsAlive = false, RpcBlockCount = -1 });
+                return Json(new RpcResponseModel { RpcIsAlive = false, RpcBlockCount = -1 });
             }
-            catch (Exception e) { }
-            return null;
+            catch (Exception e)
+            {
+                await _logger.WriteError("SolarCoinApi.Monitoring.RpcController", "", "", e);
+                return StatusCode(500);
+            }
         }
     }
 }

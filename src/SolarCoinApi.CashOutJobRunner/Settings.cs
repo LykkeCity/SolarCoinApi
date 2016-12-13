@@ -16,7 +16,7 @@ namespace SolarCoinApi.CashOutJobRunner
         public int PeriodMs { set; get; }
         public bool VerboseLogging { set; get; }
         public string HotWalletPrivKey { set; get; }
-        public QueueSettings Queue { set; get; }
+        public QueueSettings CashOutQueue { set; get; }
         public QueueSettings SlackQueue { set; get; }
         public TableSettings Monitoring { set; get; }
         public TableSettings ExistingTxes { set; get; }
@@ -25,6 +25,20 @@ namespace SolarCoinApi.CashOutJobRunner
 
         public void Validate()
         {
+            if (Logger == null)
+                throw new Exception("Logger section should be present");
+            if (CashOutQueue == null)
+                throw new Exception("CashOut Queue section should be present");
+            if (Monitoring == null)
+                throw new Exception("Monitoring section should be present");
+            if (SlackQueue == null)
+                throw new Exception("Slack Queue section should be present");
+            if (ExistingTxes == null)
+                throw new Exception("Existing Txes section should be present");
+            if (Rpc == null)
+                throw new Exception("Rpc section should be present");
+
+
             if (string.IsNullOrWhiteSpace(HotWalletPrivKey))
                 throw new Exception("Hot Wallet Private Key should be present");
 
@@ -52,9 +66,9 @@ namespace SolarCoinApi.CashOutJobRunner
             if (string.IsNullOrWhiteSpace(SlackQueue.Name))
                 throw new Exception("Slack Queue Name should be present");
 
-            if (string.IsNullOrWhiteSpace(Queue.ConnectionString))
+            if (string.IsNullOrWhiteSpace(CashOutQueue.ConnectionString))
                 throw new Exception("Queue Connection String should be present");
-            if (string.IsNullOrWhiteSpace(Queue.Name))
+            if (string.IsNullOrWhiteSpace(CashOutQueue.Name))
                 throw new Exception("Queue Name should be present");
 
             if (string.IsNullOrWhiteSpace(Rpc.Endpoint))

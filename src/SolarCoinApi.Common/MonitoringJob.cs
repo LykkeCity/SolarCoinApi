@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SolarCoinApi.Common
 {
-    public class MonitoringJob : TimerPeriod
+    public class MonitoringJob : TimerPeriodEx
     {
         private const int TimerPeriodSeconds = 30;
 
