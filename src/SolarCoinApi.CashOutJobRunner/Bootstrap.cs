@@ -48,7 +48,7 @@ namespace SolarCoinApi.CashOutJobRunner
 
             container.Register<IJsonRpcClient>(() => new JsonRpcClient(container.GetInstance<IJsonRpcClientRaw>(), container.GetInstance<IJsonRpcRawResponseFormatter>(), container.GetInstance<ILog>()), Lifestyle.Singleton);
 
-            container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.Queue.ConnectionString), Lifestyle.Singleton);
+            container.Register<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.CashOutQueue.ConnectionString), Lifestyle.Singleton);
 
             container.Register<ISlackNotifier>(() => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name)), Lifestyle.Singleton);
 

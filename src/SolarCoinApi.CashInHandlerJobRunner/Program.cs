@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SimpleInjector;
 using SolarCoinApi.Common;
-using SolarCoinApi.CashInHandlerJobRunner;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Common.Triggers;
-using SolarCoinApi.RpcJson.JsonRpc;
+using System.Runtime.Loader;
+using System.Threading;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
@@ -35,29 +31,27 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 monitoringJob.Start();
                 
                 var triggerHost = new TriggerHost(container);
+
+                var end = new ManualResetEvent(false);
+
+                AssemblyLoadContext.Default.Unloading += ctx =>
+                {
+                    Console.WriteLine("SIGTERM recieved");
+                    triggerHost.Cancel();
+
+                    end.WaitOne();
+                };
+
                 triggerHost.StartAndBlock();
 
-
-                Console.WriteLine("The job has started! Enter 'q' to quit...");
-
-                while (Console.ReadLine() != "q")
-                    continue;
+                end.Set();
 
             }
             catch (Exception e)
             {
                 monitoringJob?.Stop();
 
-                var err = e;
-                while (err != null)
-                {
-                    Console.WriteLine(err.Message);
-                    Console.WriteLine();
-                    Console.WriteLine("Stack trace:");
-                    Console.WriteLine(err.StackTrace);
-
-                    err = err.InnerException;
-                }
+                e.PrintToConsole();
 
                 Console.ReadKey();
             }

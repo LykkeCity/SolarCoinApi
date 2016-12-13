@@ -23,6 +23,22 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 
         public void Validate()
         {
+            if (GeneratedWallets == null)
+                throw new Exception("Generated Wallets section should be present");
+            if (Logger == null)
+                throw new Exception("Logger section should be present");
+            if (CashInQueue == null)
+                throw new Exception("CashIn Queue section should be present");
+            if (Monitoring == null)
+                throw new Exception("Monitoring section should be present");
+            if (TransitQueue == null)
+                throw new Exception("Transit Queue section should be present");
+            if (SlackQueue == null)
+                throw new Exception("Slack Queue section should be present");
+            if (Rpc == null)
+                throw new Exception("Rpc section should be present");
+
+
             if (string.IsNullOrWhiteSpace(HotWalletAddress))
                 throw new Exception("Hot Wallet Address Key should be present");
 

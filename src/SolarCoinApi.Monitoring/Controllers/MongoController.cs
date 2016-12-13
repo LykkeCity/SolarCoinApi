@@ -10,8 +10,6 @@ using MongoDB.Bson;
 using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core;
 
-// For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace SolarCoinApi.Monitoring.Controllers
 {
     [Route("api/[controller]")]
@@ -56,7 +54,7 @@ namespace SolarCoinApi.Monitoring.Controllers
             }
             catch (Exception e)
             {
-                await _logger.WriteError("", "", "", e);
+                await _logger.WriteError("SolarCoinApi.Monitoring.MongoController", "", "", e);
                 return StatusCode(500);
             }
         }
@@ -75,7 +73,7 @@ namespace SolarCoinApi.Monitoring.Controllers
             }
             catch(Exception e)
             {
-                await _logger.WriteError("", "", "", e);
+                await _logger.WriteError("SolarCoinApi.Monitoring.MongoController", "", "", e);
                 return StatusCode(500);
             }
         }
