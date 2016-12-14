@@ -31,6 +31,7 @@
   "publishOptions": {
     "include": [
       "appsettings.Release.json",
+      "generalsettings.json",
       "Dockerfile"
     ]
   },
