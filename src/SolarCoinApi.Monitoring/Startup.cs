@@ -1,24 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SolarCoinApi.RpcJson.JsonRpc;
-using SolarCoinApi.Core.Options;
-using SolarCoinApi.Common;
-using SolarCoinApi.Core.Log;
-using MongoDB.Bson.Serialization;
-using SimpleInjector;
-using SimpleInjector.Integration.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.ViewComponents;
-using SimpleInjector.Integration.AspNetCore;
-using MongoDB.Driver;
 using Microsoft.Extensions.Options;
-using SolarCoinApi.Core;
 using Microsoft.Extensions.PlatformAbstractions;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
+using SimpleInjector;
+using SimpleInjector.Integration.AspNetCore;
+using SimpleInjector.Integration.AspNetCore.Mvc;
+using SolarCoinApi.Common;
+using SolarCoinApi.Core;
+using SolarCoinApi.Core.Log;
+using SolarCoinApi.Core.Options;
+using SolarCoinApi.RpcJson.JsonRpc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SolarCoinApi.Monitoring
 {
@@ -30,18 +32,14 @@ namespace SolarCoinApi.Monitoring
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-#if DEBUG
-                .AddJsonFile("appsettings.Debug.json", optional: false, reloadOnChange: true);
-#elif RELEASE
-                .AddJsonFile("appsettings.Release.json", optional: false, reloadOnChange: true);
-#endif
+                .AddJsonFile("generalsettings.json", optional: false, reloadOnChange: true);
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
 
         public IConfigurationRoot Configuration { get; }
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
             var pathToXmlCommentsDoc = GetXmlCommentsPath();
@@ -51,7 +49,7 @@ namespace SolarCoinApi.Monitoring
             services.AddSingleton<IViewComponentActivator>(
                 new SimpleInjectorViewComponentActivator(container));
 
-            
+
 
             BsonClassMap.RegisterClassMap<TransactionMongoEntity>();
 
@@ -68,7 +66,7 @@ namespace SolarCoinApi.Monitoring
                 c.DescribeAllEnumsAsStrings();
             });
         }
-        
+
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseSimpleInjectorAspNetRequestScoping(container);
@@ -102,25 +100,34 @@ namespace SolarCoinApi.Monitoring
 
         private void InitializeContainer(IApplicationBuilder app)
         {
+
+#if DEBUG
+            var settings = new AppSettings<MonitoringSettings>().LoadFromEnvironment();
+            //var settings = new AppSettings<MonitoringSettings>().LoadFile("appsettings.Debug.json");
+#else
+            var settings = new AppSettings<MonitoringSettings>().LoadFromEnvironment();
+#endif
+
+
             container.RegisterMvcControllers(app);
 
             container.RegisterMvcViewComponents(app);
-            
+
             container.RegisterSingleton<LoggerOptions>(() => new LoggerOptions
             {
-                ConnectionString = Configuration.GetSection("logging:connectionString").Value,
-                ErrorTableName = Configuration.GetSection("logging:errorTableName").Value,
-                InfoTableName = Configuration.GetSection("logging:infoTableName").Value,
-                WarningTableName = Configuration.GetSection("logging:warningTableName").Value
+                ConnectionString = settings.Logger.ConnectionString,
+                ErrorTableName = settings.Logger.ErrorTableName,
+                InfoTableName = settings.Logger.InfoTableName,
+                WarningTableName = settings.Logger.WarningTableName
             });
 
             container.RegisterSingleton<ILog>(() => new TableLogger1(container.GetInstance<LoggerOptions>(), Convert.ToBoolean(Configuration.GetSection("verboseLogging").Value)));
 
             container.RegisterSingleton<RpcWalletGeneratorOptions>(() => new RpcWalletGeneratorOptions
             {
-                Endpoint = Configuration.GetSection("rpc:Endpoint").Value,
-                Username = Configuration.GetSection("rpc:Username").Value,
-                Password = Configuration.GetSection("rpc:Password").Value,
+                Endpoint = settings.Rpc.Endpoint,
+                Username = settings.Rpc.Username,
+                Password = settings.Rpc.Password,
             });
 
             IConfigureOptions<RpcWalletGeneratorOptions> configureOptions = new ConfigureOptions<RpcWalletGeneratorOptions>(x =>
@@ -137,9 +144,9 @@ namespace SolarCoinApi.Monitoring
             container.RegisterSingleton<IJsonRpcClientRaw, JsonRpcClientRaw>();
             container.RegisterSingleton<IJsonRpcRequestBuilder, JsonRpcRequestBuilder>();
 
-            container.RegisterSingleton<IMongoClient>(() => new MongoClient($"{Configuration.GetSection("mongo:host").Value}:{Configuration.GetSection("mongo:port").Value}"));
-            container.RegisterSingleton<IMongoDatabase>(() => container.GetInstance<IMongoClient>().GetDatabase(Configuration.GetSection("mongo:dbName").Value));
-            container.RegisterSingleton<IMongoCollection<TransactionMongoEntity>>(() => container.GetInstance<IMongoDatabase>().GetCollection<TransactionMongoEntity>(Configuration.GetSection("mongo:collectionName").Value));
+            container.RegisterSingleton<IMongoClient>(() => new MongoClient($"{settings.Mongo.Host}:{settings.Mongo.Port}"));
+            container.RegisterSingleton<IMongoDatabase>(() => container.GetInstance<IMongoClient>().GetDatabase(settings.Mongo.DbName));
+            container.RegisterSingleton<IMongoCollection<TransactionMongoEntity>>(() => container.GetInstance<IMongoDatabase>().GetCollection<TransactionMongoEntity>(settings.Mongo.CollectionName));
 
         }
     }

@@ -50,7 +50,7 @@ namespace SolarCoinApi.Common
 
             return settings;
         }
-        /*
+                
         public T LoadFromEnvironment()
         {
             var r = new T();
@@ -61,7 +61,7 @@ namespace SolarCoinApi.Common
         }
         
 
-        private static void ReadPropertiesRecursive(T obj, Type type, List<string> prefixes)
+        private static void ReadPropertiesRecursive(object obj, Type type, List<string> prefixes)
         {
 
             foreach (PropertyInfo property in type.GetProperties())
@@ -86,12 +86,12 @@ namespace SolarCoinApi.Common
                     if (val == null)
                         throw new ArgumentException($"'{propertyFullName}' was not found among environment variables");
 
-                    property.SetValue(obj, Convert.ChangeType(_dic[propertyFullName], property.PropertyType));
+                    property.SetValue(obj, Convert.ChangeType(Environment.GetEnvironmentVariable(propertyFullName), property.PropertyType));
                 }
             }
         }
 
-            */
+            
     }
 
 
