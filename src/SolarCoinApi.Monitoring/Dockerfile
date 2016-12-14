@@ -1,4 +1,4 @@
-FROM microsoft/dotnet
+FROM microsoft/aspnetcore
 WORKDIR /app
 EXPOSE 5001
 COPY . .
