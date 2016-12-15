@@ -24,12 +24,7 @@ namespace SolarCoinApi.Facade
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-#if DEBUG
-                .AddJsonFile("appsettings.Debug.json", optional: false, reloadOnChange: true);
-#elif RELEASE
-                .AddJsonFile("appsettings.Release.json", optional: false, reloadOnChange: true);
-#endif
-            //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+                .AddJsonFile("generalsettings.json", optional: false, reloadOnChange: true);
             
             builder.AddCommandLine(args.Args);
 
@@ -64,27 +59,35 @@ namespace SolarCoinApi.Facade
         private void ConfigureRpc(IServiceCollection services)
         {
 
+
+#if DEBUG
+            var settings = new AppSettings<FacadeSettings>().LoadFile("appsettings.Debug.json");
+#else
+            var settings = new AppSettings<FacadeSettings>().LoadFromEnvironment();
+#endif
+
+
             services.AddTransient<IWalletGenerator, RpcWalletGenerator>();
 
             services.Configure<RpcWalletGeneratorOptions>(x =>
             {
-                x.Endpoint = Configuration.GetSection("rpc:Endpoint").Value;
-                x.Username = Configuration.GetSection("rpc:Username").Value;
-                x.Password = Configuration.GetSection("rpc:Password").Value;
+                x.Endpoint = settings.Rpc.Endpoint;
+                x.Username = settings.Rpc.Username;
+                x.Password = settings.Rpc.Password;
             });
 
             services.Configure<LoggerOptions>(x =>
             {
-                x.ConnectionString = Configuration.GetSection("logging:connectionString").Value;
-                x.ErrorTableName = Configuration.GetSection("logging:errorTableName").Value;
-                x.InfoTableName = Configuration.GetSection("logging:infoTableName").Value;
-                x.WarningTableName = Configuration.GetSection("logging:warningTableName").Value;
+                x.ConnectionString = settings.Logger.ConnectionString;
+                x.ErrorTableName = settings.Logger.ErrorTableName;
+                x.InfoTableName = settings.Logger.InfoTableName;
+                x.WarningTableName = settings.Logger.WarningTableName;
             });
 
             services.Configure<WalletGeneratorControllerOptions>(x =>
             {
-                x.ConnectionString = Configuration.GetSection("generatedWallets:connectionString").Value;
-                x.TableName = Configuration.GetSection("generatedWallets:tableName").Value;
+                x.ConnectionString = settings.GeneratedWallets.ConnectionString;
+                x.TableName = settings.GeneratedWallets.Name;
             });
 
             services.AddTransient<IJsonRpcClient, JsonRpcClient>();
