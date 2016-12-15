@@ -33,11 +33,9 @@ namespace SolarCoinApi.Facade
         }
 
         public IConfigurationRoot Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container
+        
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add framework services.
             services.AddApplicationInsightsTelemetry(Configuration);
 
             services.AddMvc();
@@ -95,8 +93,7 @@ namespace SolarCoinApi.Facade
             services.AddTransient<IJsonRpcRequestBuilder, JsonRpcRequestBuilder>();
             services.AddTransient<IJsonRpcRawResponseFormatter, JsonRpcRawResponseFormatter>();
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
+        
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));

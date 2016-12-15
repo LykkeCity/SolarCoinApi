@@ -90,9 +90,14 @@ namespace SolarCoinApi.Common.Triggers.Bindings
                         await ProcessFailedMessage(message);
                         executionSucceeded = false;
                     }
-                    finally
+
+                    try
                     {
                         await Task.Delay(_delayStrategy.GetNextDelay(executionSucceeded), cancellationToken);
+                    }
+                    catch (TaskCanceledException e)
+                    {
+
                     }
                 }
             }, cancellationToken);
