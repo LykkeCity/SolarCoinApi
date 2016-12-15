@@ -49,7 +49,9 @@
       "wwwroot",
       "**/*.cshtml",
       "appsettings.Release.json",
-      "web.config"
+      "web.config",
+      "Dockerfile",
+      "generalsettings.json"
     ]
   },
   "scripts": {
