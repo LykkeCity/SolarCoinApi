@@ -24,7 +24,7 @@ namespace SolarCoinApi.Common
             }
             catch (Exception e)
             {
-
+                var a = 234;
             }
         }
     }

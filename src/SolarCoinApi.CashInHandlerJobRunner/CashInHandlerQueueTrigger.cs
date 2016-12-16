@@ -84,8 +84,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             }
             catch (Exception e)
             {
+                await _slackNotifier.Notify(new SlackMessage { Sender = "CashInHandlerQueueTrigger", Type = "Errors", Message = "Error occured during cashin handling" });
                 await _log.WriteError("CashInHandlerQueueTrigger", "", message.TxId, e);
-                await _slackNotifier.Notify(new SlackMessage { Sender = "CashInHandlerQueueTrigger", Type = "Error", Message = "Error occured during cashin handling" });
                 throw;
             }
         }

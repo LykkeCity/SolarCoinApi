@@ -69,7 +69,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
             }
             catch (Exception e)
             {
-                await _slackNotifier.Notify(new SlackMessage { Sender = "CashInGrabberJob", Type = "Error", Message = "Error occured during transfer from mongo" });
+                await _slackNotifier.Notify(new SlackMessage { Sender = "CashInGrabberJob", Type = "Errors", Message = "Error occured during transfer from mongo" });
                 throw;
             }
         }

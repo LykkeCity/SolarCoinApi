@@ -47,8 +47,8 @@ namespace SolarCoinApi.CashOutJobRunner
             }
             catch (Exception e)
             {
+                await _slackNotifier.Notify(new SlackMessage { Sender = "CashOutQueueTrigger", Type = "Errors", Message = "Error occured during cashout" });
                 await _log.WriteError("CashOutQueueTrigger", "", message.Id, e);
-                await _slackNotifier.Notify(new SlackMessage { Sender = "CashOutQueueTrigger", Type = "Error", Message = "Error occured during cashout" });
                 throw;
             }
         }
