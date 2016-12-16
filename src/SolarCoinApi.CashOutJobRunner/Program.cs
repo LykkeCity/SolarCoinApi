@@ -21,7 +21,7 @@ namespace SolarCoinApi.CashOutJobRunner
 #if DEBUG
                 var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
-                var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.Release.json");
+                var settings = new AppSettings<CashOutSettings>().LoadFromEnvironment();
 #endif
 
                 var container = new Container();
