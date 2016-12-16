@@ -60,8 +60,9 @@ namespace SolarCoinApi.CashOutJobRunner
                 monitoringJob?.Stop();
 
                 e.PrintToConsole();
-
+#if DEBUG
                 Console.ReadKey();
+#endif
             }
 
         }
