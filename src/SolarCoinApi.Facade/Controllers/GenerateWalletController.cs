@@ -42,6 +42,7 @@ namespace SolarCoinApi.Facade.Controllers
 
                 var storage = new AzureTableStorage<WalletStorageEntity>(_options.Value.ConnectionString, _options.Value.TableName, _logger);
 
+
                 await storage.InsertAsync(new WalletStorageEntity
                 {
                     PartitionKey = "part",
