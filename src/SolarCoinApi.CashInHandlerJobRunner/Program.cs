@@ -20,7 +20,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 #if DEBUG
                 var settings = new AppSettings<CashInHandlerSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
-                var settings = new AppSettings<CashInHandlerSettings>().LoadFile("appsettings.Release.json");
+                var settings = new AppSettings<CashInHandlerSettings>().LoadFromEnvironment();
 #endif
                 
                 var container = new Container();

@@ -4,7 +4,6 @@ using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.Common.Triggers.Attributes;
 using SolarCoinApi.Core;
 using SolarCoinApi.Core.Log;
-using SolarCoinApi.Core.Settings;
 using SolarCoinApi.RpcJson.JsonRpc;
 using System;
 using System.Collections.Generic;
