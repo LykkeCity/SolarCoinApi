@@ -43,8 +43,9 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 monitoringJob?.Stop();
                 
                 e.PrintToConsole();
-
+#if DEBUG
                 Console.ReadKey();
+#endif
             }
         }
     }
