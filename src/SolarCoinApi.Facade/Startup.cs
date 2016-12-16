@@ -15,6 +15,7 @@ using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson;
 using SolarCoinApi.RpcJson.JsonRpc;
+using SolarCoinApi.AzureStorage.Queue;
 
 namespace SolarCoinApi.Facade
 {
@@ -34,6 +35,7 @@ namespace SolarCoinApi.Facade
 
         public IConfigurationRoot Configuration { get; }
         
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplicationInsightsTelemetry(Configuration);
@@ -87,6 +89,8 @@ namespace SolarCoinApi.Facade
                 x.ConnectionString = settings.GeneratedWallets.ConnectionString;
                 x.TableName = settings.GeneratedWallets.Name;
             });
+
+            services.AddTransient<ISlackNotifier>(x => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name)));
 
             services.AddTransient<IJsonRpcClient, JsonRpcClient>();
             services.AddTransient<IJsonRpcClientRaw, JsonRpcClientRaw>();

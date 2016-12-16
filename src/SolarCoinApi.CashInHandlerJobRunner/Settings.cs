@@ -66,6 +66,11 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             if (string.IsNullOrWhiteSpace(Monitoring.ConnectionString))
                 throw new Exception("Monitoring Name should be present");
 
+            if (string.IsNullOrWhiteSpace(GeneratedWallets.ConnectionString))
+                throw new Exception("Generated Wallets Connection String should be present");
+            if (string.IsNullOrWhiteSpace(GeneratedWallets.Name))
+                throw new Exception("Generated Wallets Name should be present");
+
 
             if (string.IsNullOrWhiteSpace(TransitQueue.ConnectionString))
                 throw new Exception("Transit Queue Connection String should be present");

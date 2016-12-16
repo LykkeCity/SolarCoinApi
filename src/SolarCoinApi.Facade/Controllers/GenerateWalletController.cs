@@ -18,11 +18,13 @@ namespace SolarCoinApi.Facade.Controllers
         private readonly IWalletGenerator _walletGenerator;
 
         private readonly ILog _logger;
+        private readonly ISlackNotifier _slackNotifier;
         private readonly IOptions<WalletGeneratorControllerOptions> _options;
 
-        public GenerateWalletController(IWalletGenerator walletGenerator, ILog logger, IOptions<WalletGeneratorControllerOptions> options)
+        public GenerateWalletController(IWalletGenerator walletGenerator, ILog logger, ISlackNotifier slackNotifier, IOptions<WalletGeneratorControllerOptions> options)
         {
             _walletGenerator = walletGenerator;
+            _slackNotifier = slackNotifier;
             _options = options;
             _logger = logger;
         }
@@ -32,6 +34,8 @@ namespace SolarCoinApi.Facade.Controllers
         {
             try
             {
+                throw new Exception();
+
                 var generatedWallet = await _walletGenerator.GenerateWalletAsync();
 
                 if (string.IsNullOrEmpty(generatedWallet.Address) || string.IsNullOrEmpty(generatedWallet.PrivateKey) ||
@@ -53,6 +57,7 @@ namespace SolarCoinApi.Facade.Controllers
             }
             catch (Exception e)
             {
+                await _slackNotifier.Notify(new SlackMessage { Sender = "SolarCoinApi.Facade", Type = "Error", Message = "Error occured during SolarCoin address generation." });
                 await _logger.WriteError("Wallet generator", "", "", e);
                 int i = 0;
                 while (e.InnerException != null)
