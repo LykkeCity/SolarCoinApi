@@ -13,7 +13,6 @@ namespace SolarCoinApi.CashOutJobRunner
 
     public class CashOutSettings : IValidatable
     {
-        public int PeriodMs { set; get; }
         public bool VerboseLogging { set; get; }
         public string HotWalletPrivKey { set; get; }
         public QueueSettings CashOutQueue { set; get; }

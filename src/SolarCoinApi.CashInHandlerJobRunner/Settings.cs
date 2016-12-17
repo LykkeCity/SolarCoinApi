@@ -17,8 +17,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         public QueueSettings SlackQueue { set; get; }
         public RpcSettings Rpc { set; get; }
         public string HotWalletAddress { set; get; }
-        public decimal TxFee { set; get; }
-        public decimal MinTxAmount { set; get; }
+        public decimal CashInTxFee { set; get; }
+        public decimal CashInMinTxAmount { set; get; }
         public bool VerboseLogging { set; get; }
 
         public void Validate()

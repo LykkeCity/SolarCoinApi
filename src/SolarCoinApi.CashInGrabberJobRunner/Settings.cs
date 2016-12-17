@@ -16,8 +16,8 @@ namespace SolarCoinApi.CashInGrabberJobRunner
         public QueueSettings SlackQueue { set; get; }
         public TableSettings Monitoring { set; get; }
         public bool VerboseLogging { set; get; }
-        public int Threshold { get; set; }
-        public int Period { get; set; }
+        public int CashInThreshold { get; set; }
+        public int CashInPeriod { get; set; }
 
         public void Validate()
         {

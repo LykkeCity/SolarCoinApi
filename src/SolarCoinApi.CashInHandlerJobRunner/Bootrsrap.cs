@@ -63,8 +63,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                         container.GetInstance<IJsonRpcClient>(),
                         container.GetInstance<ISlackNotifier>(),
                         settings.HotWalletAddress,
-                        settings.TxFee,
-                        settings.MinTxAmount));
+                        settings.CashInTxFee,
+                        settings.CashInMinTxAmount));
 
             container.RegisterSingleton<MonitoringJob>(() => new MonitoringJob(
                     "SolarCoinApi.CashInHandler",

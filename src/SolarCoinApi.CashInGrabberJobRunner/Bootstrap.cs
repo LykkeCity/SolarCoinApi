@@ -42,12 +42,12 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
             container.Register<CashInGrabberJob>(() => new CashInGrabberJob(
                 "CashInGrabber",
-                settings.Period,
+                settings.CashInPeriod,
                 container.GetInstance<ILog>(),
                 collection,
                 container.GetInstance<IQueueExt>(),
                 container.GetInstance<ISlackNotifier>(),
-                settings.Threshold), Lifestyle.Singleton);
+                settings.CashInThreshold), Lifestyle.Singleton);
 
             container.Register<MonitoringJob>(() => new MonitoringJob(
                 "SolarCoinApi.CashInGrabber",
