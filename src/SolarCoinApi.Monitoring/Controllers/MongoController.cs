@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Log;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core;
 
 namespace SolarCoinApi.Monitoring.Controllers
@@ -54,7 +54,7 @@ namespace SolarCoinApi.Monitoring.Controllers
             }
             catch (Exception e)
             {
-                await _logger.WriteError("SolarCoinApi.Monitoring.MongoController", "", "", e);
+                await _logger.WriteErrorAsync("SolarCoinApi.Monitoring.MongoController", "", "", e);
                 return StatusCode(500);
             }
         }
@@ -73,7 +73,7 @@ namespace SolarCoinApi.Monitoring.Controllers
             }
             catch(Exception e)
             {
-                await _logger.WriteError("SolarCoinApi.Monitoring.MongoController", "", "", e);
+                await _logger.WriteErrorAsync("SolarCoinApi.Monitoring.MongoController", "", "", e);
                 return StatusCode(500);
             }
         }

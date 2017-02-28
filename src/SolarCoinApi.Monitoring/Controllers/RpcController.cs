@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using SolarCoinApi.RpcJson.JsonRpc;
 using System.Net.Http;
-using SolarCoinApi.Core.Log;
+using Common.Log;
 
 namespace SolarCoinApi.Monitoring.Controllers
 {
@@ -46,7 +46,7 @@ namespace SolarCoinApi.Monitoring.Controllers
             }
             catch (Exception e)
             {
-                await _logger.WriteError("SolarCoinApi.Monitoring.RpcController", "", "", e);
+                await _logger.WriteErrorAsync("SolarCoinApi.Monitoring.RpcController", "", "", e);
                 return StatusCode(500);
             }
         }

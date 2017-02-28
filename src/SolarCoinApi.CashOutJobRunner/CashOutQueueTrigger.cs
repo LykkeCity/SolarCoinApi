@@ -1,16 +1,15 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
-using SolarCoinApi.AzureStorage;
-using SolarCoinApi.AzureStorage.Queue;
 using SolarCoinApi.CashOutJobRunner;
 using SolarCoinApi.Common.Triggers.Attributes;
 using SolarCoinApi.Core;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.RpcJson.JsonRpc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureStorage;
+using Common.Log;
 
 namespace SolarCoinApi.CashOutJobRunner
 {
@@ -34,7 +33,7 @@ namespace SolarCoinApi.CashOutJobRunner
         {
             try
             {
-                await _log.WriteInfo("CashOutQueueTrigger", "", message.Id, $"Cash out request grabbed: Address: '{message.Address}', Amount: {message.Amount}");
+                await _log.WriteInfoAsync("CashOutQueueTrigger", "", message.Id, $"Cash out request grabbed: Address: '{message.Address}', Amount: {message.Amount}");
 
                 if (_existingTxes.Any(x => x.RowKey == message.Id))
                     return;
@@ -43,12 +42,12 @@ namespace SolarCoinApi.CashOutJobRunner
 
                 var resultTxId = await _rpcClient.SendToAddress(message.Address, message.Amount);
 
-                await _log.WriteInfo("CashOutQueueTrigger", "", message.Id, $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
+                await _log.WriteInfoAsync("CashOutQueueTrigger", "", message.Id, $"Cash out succeded. Resulting transaction Id: '{resultTxId}'");
             }
             catch (Exception e)
             {
                 await _slackNotifier.Notify(new SlackMessage { Sender = "CashOutQueueTrigger", Type = "Errors", Message = "Error occured during cashout" });
-                await _log.WriteError("CashOutQueueTrigger", "", message.Id, e);
+                await _log.WriteErrorAsync("CashOutQueueTrigger", "", message.Id, e);
                 throw;
             }
         }

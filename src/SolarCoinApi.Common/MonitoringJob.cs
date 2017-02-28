@@ -1,10 +1,10 @@
 ﻿using SolarCoinApi.Core;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Timers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Log;
 
 namespace SolarCoinApi.Common
 {

@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureStorage.Tables;
+using Common.Log;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using SolarCoinApi.AzureStorage;
-using SolarCoinApi.AzureStorage.Tables;
 using SolarCoinApi.Core;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
 
 namespace SolarCoinApi.Facade.Controllers
@@ -57,12 +56,12 @@ namespace SolarCoinApi.Facade.Controllers
             catch (Exception e)
             {
                 await _slackNotifier.Notify(new SlackMessage { Sender = "SolarCoinApi.Facade", Type = "Errors", Message = "Error occured during SolarCoin address generation." });
-                await _logger.WriteError("Wallet generator", "", "", e);
+                await _logger.WriteErrorAsync("Wallet generator", "", "", e);
                 int i = 0;
                 while (e.InnerException != null)
                 {
                     e = e.InnerException;
-                    await _logger.WriteError("Wallet generator", "", $"InnerException-lvl-{i}", e);
+                    await _logger.WriteErrorAsync("Wallet generator", "", $"InnerException-lvl-{i}", e);
                     i++;
                 }
             }

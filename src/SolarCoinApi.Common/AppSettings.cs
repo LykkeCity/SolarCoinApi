@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SolarCoinApi.AzureStorage.Blob;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.ComponentModel;
+using AzureStorage.Blob;
 
 namespace SolarCoinApi.Common
 {

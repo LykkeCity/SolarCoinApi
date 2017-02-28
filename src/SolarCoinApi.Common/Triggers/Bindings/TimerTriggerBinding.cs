@@ -1,11 +1,11 @@
 ﻿using SolarCoinApi.Common.Triggers.Attributes;
-using SolarCoinApi.Core.Log;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Log;
 
 namespace SolarCoinApi.Common.Triggers.Bindings
 {
@@ -58,7 +58,7 @@ namespace SolarCoinApi.Common.Triggers.Bindings
         {
             try
             {
-                return _log.WriteError(component, process, null, ex);
+                return _log.WriteErrorAsync(component, process, null, ex);
             }
             catch (Exception logEx)
             {

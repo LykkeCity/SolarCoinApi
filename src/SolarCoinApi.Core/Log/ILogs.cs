@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace SolarCoinApi.Core.Log
 {
+    /*
     public interface ILog
     {
         Task WriteInfo(string component, string process, string context, string info, DateTime? dateTime = null);
@@ -12,4 +13,5 @@ namespace SolarCoinApi.Core.Log
         Task WriteError(string component, string process, string context, Exception exeption, DateTime? dateTime = null);
         Task WriteFatalError(string component, string process, string context, Exception exeption, DateTime? dateTime = null);
     }
+    */
 }

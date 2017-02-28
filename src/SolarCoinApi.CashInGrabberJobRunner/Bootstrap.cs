@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using SimpleInjector;
-using SolarCoinApi.AzureStorage.Queue;
-using SolarCoinApi.AzureStorage.Tables;
-using SolarCoinApi.Common;
 using SolarCoinApi.Core;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureStorage.Queue;
+using AzureStorage.Tables;
+using Common.Log;
+using SolarCoinApi.Common;
 
 namespace SolarCoinApi.CashInGrabberJobRunner
 {

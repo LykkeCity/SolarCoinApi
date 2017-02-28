@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json;
-using SolarCoinApi.AzureStorage;
-using SolarCoinApi.AzureStorage.Queue;
-using SolarCoinApi.Common.Triggers.Attributes;
 using SolarCoinApi.Core;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.RpcJson.JsonRpc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureStorage;
+using AzureStorage.Queue;
+using Common.Log;
+using SolarCoinApi.Common.Triggers.Attributes;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
@@ -57,7 +57,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 // if none of the outputs where dedicated to our users, return;
                 if (ourVouts.Count == 0)
                 {
-                    await _log.WriteWarning("CashInHandlerQueueTrigger", "", "", "didn't contain relevant addresses");
+                    await _log.WriteWarningAsync("CashInHandlerQueueTrigger", "", "", "didn't contain relevant addresses");
                     return;
                 }
 
@@ -85,7 +85,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             catch (Exception e)
             {
                 await _slackNotifier.Notify(new SlackMessage { Sender = "CashInHandlerQueueTrigger", Type = "Errors", Message = "Error occured during cashin handling" });
-                await _log.WriteError("CashInHandlerQueueTrigger", "", message.TxId, e);
+                await _log.WriteErrorAsync("CashInHandlerQueueTrigger", "", message.TxId, e);
                 throw;
             }
         }

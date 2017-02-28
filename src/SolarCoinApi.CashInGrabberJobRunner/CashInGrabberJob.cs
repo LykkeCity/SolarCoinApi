@@ -1,12 +1,12 @@
 ﻿using SolarCoinApi.Core.Timers;
 using System.Threading.Tasks;
-using SolarCoinApi.Core.Log;
 using MongoDB.Driver;
-using SolarCoinApi.AzureStorage.Queue;
 using System.Linq;
 using SolarCoinApi.Core;
 using Newtonsoft.Json;
 using System;
+using AzureStorage.Queue;
+using Common.Log;
 
 namespace SolarCoinApi.CashInGrabberJobRunner
 {
@@ -37,20 +37,20 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
                 if (newTxes.Count() == 0)
                 {
-                    await _log.WriteInfo(GetComponentName(), "", "", "No unprocessed tx-es found. Reseting period to normal");
+                    await _log.WriteInfoAsync(GetComponentName(), "", "", "No unprocessed tx-es found. Reseting period to normal");
                     UpdatePeriod(_normalPeriodMs);
                     return;
                 }
 
                 if (newTxes.Count() == _threshold)
                 {
-                    await _log.WriteInfo(GetComponentName(), "", "", "Threshold reached. Minifying period.");
+                    await _log.WriteInfoAsync(GetComponentName(), "", "", "Threshold reached. Minifying period.");
                     UpdatePeriod(0);
                 }
 
                 if (newTxes.Count() < _threshold)
                 {
-                    await _log.WriteInfo(GetComponentName(), "", "", $"{newTxes.Count()} unprocessed tx-es found. Reseting period to normal. Processing...");
+                    await _log.WriteInfoAsync(GetComponentName(), "", "", $"{newTxes.Count()} unprocessed tx-es found. Reseting period to normal. Processing...");
                     UpdatePeriod(_normalPeriodMs);
                 }
 
@@ -65,7 +65,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                     await _blockchainExplorer.UpdateOneAsync(filter, update);
                 }
 
-                await _log.WriteInfo(GetComponentName(), "", "", $"{newTxes.Count()} tx-es successfully processed!");
+                await _log.WriteInfoAsync(GetComponentName(), "", "", $"{newTxes.Count()} tx-es successfully processed!");
             }
             catch (Exception e)
             {

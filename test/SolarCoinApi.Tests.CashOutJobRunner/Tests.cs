@@ -1,12 +1,12 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.RpcJson.JsonRpc;
 using SolarCoinApi.CashOutJobRunner;
 using System.Threading.Tasks;
-using SolarCoinApi.AzureStorage.Tables;
 using System.Collections.Generic;
 using System.Linq;
+using AzureStorage.Tables;
+using Common.Log;
 using SolarCoinApi.Core;
 
 namespace SolarCoinApi.Tests.CashOutJobRunner

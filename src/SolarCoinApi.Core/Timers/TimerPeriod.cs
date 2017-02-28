@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Log;
 using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Timers.Interfaces;
 
@@ -28,7 +29,7 @@ namespace SolarCoinApi.Core.Timers
         {
             try
             {
-                _log.WriteFatalError(_componentName, "Loop", "", exception).Wait();
+                _log.WriteFatalErrorAsync(_componentName, "Loop", "", exception).Wait();
             }
             catch (Exception)
             {

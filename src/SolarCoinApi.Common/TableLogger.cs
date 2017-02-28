@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureStorage;
+using AzureStorage.Tables;
+using Common.Log;
 using Microsoft.Extensions.Options;
-using SolarCoinApi.AzureStorage;
-using SolarCoinApi.AzureStorage.Tables;
 using SolarCoinApi.Core;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
 
 namespace SolarCoinApi.Common
@@ -45,22 +45,22 @@ namespace SolarCoinApi.Common
                 await _infoTableStorage.InsertAndGenerateRowKeyAsTimeAsync(newEntity, dt);
         }
 
-        public Task WriteInfo(string component, string process, string context, string info, DateTime? dateTime = null)
+        public Task WriteInfoAsync(string component, string process, string context, string info, DateTime? dateTime = null)
         {
             return _verbose ? Insert("info", component, process, context, null, null, info, dateTime) : Task.CompletedTask;
         }
 
-        public Task WriteWarning(string component, string process, string context, string info, DateTime? dateTime = null)
+        public Task WriteWarningAsync(string component, string process, string context, string info, DateTime? dateTime = null)
         {
             return Insert("warning", component, process, context, null, null, info, dateTime);
         }
 
-        public Task WriteError(string component, string process, string context, Exception type, DateTime? dateTime = null)
+        public Task WriteErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
             return Insert("error", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
         }
 
-        public Task WriteFatalError(string component, string process, string context, Exception type, DateTime? dateTime = null)
+        public Task WriteFatalErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
             return Insert("fatalerror", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
         }

@@ -1,16 +1,16 @@
 ﻿using NUnit.Framework;
-using SolarCoinApi.AzureStorage.Tables;
 using SolarCoinApi.CashInHandlerJobRunner;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
-using SolarCoinApi.AzureStorage.Queue;
-using SolarCoinApi.Core;
-using SolarCoinApi.RpcJson.JsonRpc;
 using Newtonsoft.Json;
 using System.Reflection;
+using AzureStorage.Queue;
+using AzureStorage.Tables;
+using SolarCoinApi.Core;
+using SolarCoinApi.RpcJson.JsonRpc;
 
 namespace SolarCoinApi.Tests.CashInHandlerJobRunner
 {

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using Common.Log;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
 
 namespace SolarCoinApi.RpcJson.JsonRpc
@@ -89,7 +89,7 @@ namespace SolarCoinApi.RpcJson.JsonRpc
             {
                 var req = _requestBuilder.BuildJson(method, args);
 
-                await _logger.WriteInfo("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
+                await _logger.WriteInfoAsync("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
 
                 using (
                     HttpResponseMessage response =

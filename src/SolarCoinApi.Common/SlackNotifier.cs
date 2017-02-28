@@ -1,11 +1,11 @@
-﻿using SolarCoinApi.AzureStorage.Queue;
-using SolarCoinApi.Common;
+﻿using SolarCoinApi.Common;
 using SolarCoinApi.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using AzureStorage.Queue;
 
 namespace SolarCoinApi.Common
 {

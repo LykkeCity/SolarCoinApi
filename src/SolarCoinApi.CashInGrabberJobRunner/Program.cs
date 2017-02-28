@@ -1,8 +1,8 @@
 ﻿using SimpleInjector;
-using SolarCoinApi.Common;
 using System;
 using MongoDB.Bson.Serialization;
 using SolarCoinApi.Core;
+using SolarCoinApi.Common;
 
 namespace SolarCoinApi.CashInGrabberJobRunner
 {

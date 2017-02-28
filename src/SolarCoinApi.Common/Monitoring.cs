@@ -1,10 +1,10 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
-using SolarCoinApi.AzureStorage;
 using SolarCoinApi.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AzureStorage;
 
 namespace SolarCoinApi.Common
 {

@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using AzureStorage.Queue;
+using Common.Log;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SolarCoinApi.AzureStorage;
 using SolarCoinApi.Common;
 using SolarCoinApi.Core;
-using SolarCoinApi.Core.Log;
 using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson;
 using SolarCoinApi.RpcJson.JsonRpc;
-using SolarCoinApi.AzureStorage.Queue;
 
 namespace SolarCoinApi.Facade
 {
