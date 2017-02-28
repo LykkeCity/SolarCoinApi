@@ -14,8 +14,6 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SolarCoinApi.Core", "src\So
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SolarCoinApi.RpcJson", "src\SolarCoinApi.RpcJson\SolarCoinApi.RpcJson.xproj", "{A56560B7-BD80-41BB-99A8-82C05A86B001}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SolarCoinApi.AzureStorage", "src\SolarCoinApi.AzureStorage\SolarCoinApi.AzureStorage.xproj", "{933CA443-0561-42A3-A0B5-1727C2A7F2C1}"
-EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SolarCoinApi.Facade", "src\SolarCoinApi.Facade\SolarCoinApi.Facade.xproj", "{AE39FADF-F93F-45FD-BC8F-43B858E2DC4E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JobRunners", "JobRunners", "{D5C36182-0E69-4223-A12C-E9D617EB92DB}"
