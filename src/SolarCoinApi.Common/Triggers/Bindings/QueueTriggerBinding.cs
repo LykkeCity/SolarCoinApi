@@ -75,7 +75,7 @@ namespace SolarCoinApi.Common.Triggers.Bindings
                         if (message == null)
                             continue;
 
-                        var p = new List<object>() { message.Value(_parameterType) };
+                        var p = new List<object>() {message.Value(_parameterType)};
 
                         if (_hasSecondParameter)
                             p.Add(message.InsertionTime);
@@ -90,14 +90,16 @@ namespace SolarCoinApi.Common.Triggers.Bindings
                         await ProcessFailedMessage(message);
                         executionSucceeded = false;
                     }
-
-                    try
+                    finally
                     {
-                        await Task.Delay(_delayStrategy.GetNextDelay(executionSucceeded), cancellationToken);
-                    }
-                    catch (TaskCanceledException e)
-                    {
+                        try
+                        {
+                            await Task.Delay(_delayStrategy.GetNextDelay(executionSucceeded), cancellationToken);
+                        }
+                        catch (TaskCanceledException e)
+                        {
 
+                        }
                     }
                 }
             }, cancellationToken);
