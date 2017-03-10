@@ -10,7 +10,7 @@ namespace SolarCoinApi.Common
 {
     public class MonitoringJob : TimerPeriodEx
     {
-        private const int TimerPeriodSeconds = 30;
+        private const int TimerPeriodSeconds = 10;
 
         private string _component;
 
@@ -29,7 +29,9 @@ namespace SolarCoinApi.Common
 
         public override async Task Execute()
         {
+            await _log.WriteInfoAsync(GetComponentName(), "Monitoring", "", "preparing to write to table");
             await _repository.SaveAsync(new Monitoring { DateTime = DateTime.UtcNow, ServiceName = _component });
+            await _log.WriteInfoAsync(GetComponentName(), "Monitoring", "", "done writing to table");
         }
     }
 }

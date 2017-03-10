@@ -46,17 +46,42 @@ namespace SolarCoinApi.Core.Timers
             {
                 try
                 {
+                    await TryToLogInfo("Preparing to call for iteration");
+                    
                     CurrentIteration = Execute();
+
+                    await TryToLogInfo("Iteration called");
+
                     await CurrentIteration;
+
+                    await TryToLogInfo("Preparing to call for iteration");
                 }
                 catch (Exception exception)
                 {
                     LogFatalError(exception);
                 }
+
+                await TryToLogInfo("Preparing to pause");
+
                 await Task.Delay(_periodMs);
+
+                await TryToLogInfo("Done waiting");
             }
         }
-        
+
+        private async Task TryToLogInfo(string info)
+        {
+
+            try
+            {
+                await _log.WriteInfoAsync(GetComponentName(), "Monitoring", "", info);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
         protected void UpdatePeriod(int newPeriodMs)
         {
             _periodMs = newPeriodMs;
