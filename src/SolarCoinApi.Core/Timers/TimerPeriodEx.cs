@@ -46,15 +46,15 @@ namespace SolarCoinApi.Core.Timers
             {
                 try
                 {
-                    await TryToLogInfo("Preparing to call for iteration");
+                    //await TryToLogInfo("Preparing to call for iteration");
                     
                     CurrentIteration = Execute();
 
-                    await TryToLogInfo("Iteration called");
+                    //await TryToLogInfo("Iteration called");
 
                     await CurrentIteration;
 
-                    await TryToLogInfo("Preparing to call for iteration");
+                    //await TryToLogInfo("Preparing to call for iteration");
                 }
                 catch (Exception exception)
                 {
