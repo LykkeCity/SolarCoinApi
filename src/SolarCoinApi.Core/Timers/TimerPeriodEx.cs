@@ -74,7 +74,7 @@ namespace SolarCoinApi.Core.Timers
 
             try
             {
-                await _log.WriteInfoAsync(GetComponentName(), "Monitoring", "", info);
+                await _log.WriteInfoAsync(GetComponentName(), "TimerPeriodEx", "", info);
             }
             catch (Exception)
             {
