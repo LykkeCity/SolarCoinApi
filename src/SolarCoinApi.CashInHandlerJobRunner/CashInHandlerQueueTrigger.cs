@@ -41,6 +41,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         {
             try
             {
+                await _log.WriteInfoAsync("CashInHandlerQueueTrigger", "", message.TxId, "beginning to process");
+
                 var ourVouts = new List<VoutEx>();
 
                 // get outputs that where dedicated to our users
@@ -57,7 +59,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 // if none of the outputs where dedicated to our users, return;
                 if (ourVouts.Count == 0)
                 {
-                    await _log.WriteWarningAsync("CashInHandlerQueueTrigger", "", "", "didn't contain relevant addresses");
+                    await _log.WriteInfoAsync("CashInHandlerQueueTrigger", "", message.TxId, "didn't contain relevant addresses");
                     return;
                 }
 
@@ -77,6 +79,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                     var rawTx = await _rpcClient.CreateRawTransaction(ourVouts.Where(x => x.Address == addr).Select(x => new { txid = message.TxId, vout = x.voutId }).ToArray(), dest);
                     var signedTx = await _rpcClient.SignRawTransaction(rawTx, userWallet.PrivateKey);
                     var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
+
+                    await _log.WriteInfoAsync("CashInHandlerQueueTrigger", "", message.TxId, "transferred. posting to queue.");
 
                     await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new QueueModel { Address = addr, Amount = changePerAddressInSlr, TxId = message.TxId }));
                 }

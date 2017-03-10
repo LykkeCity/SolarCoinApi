@@ -56,6 +56,8 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
                 foreach (var tx in newTxes)
                 {
+                    await _log.WriteInfoAsync(GetComponentName(), "", tx.TxId, "Preparing to process");
+
                     await _transitQueue.PutRawMessageAsync(JsonConvert.SerializeObject(tx.ToTransitQueueMessage()));
 
                     var filter = Builders<TransactionMongoEntity>.Filter.Eq("txid", tx.TxId);

@@ -1,5 +1,6 @@
 ﻿using SimpleInjector;
 using System;
+using Common.Log;
 using MongoDB.Bson.Serialization;
 using SolarCoinApi.Core;
 using SolarCoinApi.Common;
@@ -12,9 +13,11 @@ namespace SolarCoinApi.CashInGrabberJobRunner
         {
             MonitoringJob monitoringJob = null;
 
+            Container container = null;
+
             try
             {
-                var container = new Container();
+                container = new Container();
 
 #if DEBUG
                 var settings = new AppSettings<CashInGrabberSettings>().LoadFile("appsettings.Debug.json");
@@ -41,6 +44,8 @@ namespace SolarCoinApi.CashInGrabberJobRunner
             catch (Exception e)
             {
                 monitoringJob?.Stop();
+
+                container?.GetInstance<ILog>().WriteErrorAsync("CashInGrabberJobRunner", "", "", e);
                 
                 e.PrintToConsole();
 #if DEBUG

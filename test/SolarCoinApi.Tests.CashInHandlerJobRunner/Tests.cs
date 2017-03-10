@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.Reflection;
 using AzureStorage.Queue;
 using AzureStorage.Tables;
+using Common.Log;
 using SolarCoinApi.Core;
 using SolarCoinApi.RpcJson.JsonRpc;
 
@@ -45,10 +46,12 @@ namespace SolarCoinApi.Tests.CashInHandlerJobRunner
 
             var fakeSlackNotifier = Substitute.For<ISlackNotifier>();
 
+            var fakeLogger = Substitute.For<ILog>();
 
-            var queueTrigger = new CashInHandlerQueueTrigger(generatedWallets, null, fakeTxesQueue, fakeRpcClient, fakeSlackNotifier, hotWalletAddress, txFee, minTxAmount);
 
+            var queueTrigger = new CashInHandlerQueueTrigger(generatedWallets, fakeLogger, fakeTxesQueue, fakeRpcClient, fakeSlackNotifier, hotWalletAddress, txFee, minTxAmount);
 
+            
 
             string txId = Guid.NewGuid().ToString();
             var message = new TransitQueueMessage

@@ -89,7 +89,9 @@ namespace SolarCoinApi.RpcJson.JsonRpc
             {
                 var req = _requestBuilder.BuildJson(method, args);
 
-                await _logger.WriteInfoAsync("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
+                //await _logger.WriteInfoAsync("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
+                await _logger.WriteInfoAsync("JsonRpcClientRaw", "", method, "Posting to RPC");
+
 
                 using (
                     HttpResponseMessage response =

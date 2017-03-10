@@ -5,6 +5,7 @@ using SimpleInjector;
 using SolarCoinApi.Common.Triggers;
 using System.Runtime.Loader;
 using System.Threading;
+using Common.Log;
 
 namespace SolarCoinApi.CashOutJobRunner
 {
@@ -13,6 +14,8 @@ namespace SolarCoinApi.CashOutJobRunner
         public static void Main(string[] args)
         {
             MonitoringJob monitoringJob = null;
+
+            Container container = null;
 
             try
             {
@@ -24,7 +27,7 @@ namespace SolarCoinApi.CashOutJobRunner
                 var settings = new AppSettings<CashOutSettings>().LoadFromEnvironment();
 #endif
 
-                var container = new Container();
+                container = new Container();
 
                 Bootstrap.Start(container, settings);
 
@@ -59,6 +62,8 @@ namespace SolarCoinApi.CashOutJobRunner
             {
                 monitoringJob?.Stop();
 
+                container?.GetInstance<ILog>().WriteErrorAsync("CashOutJobRunner", "", "", e);
+                
                 e.PrintToConsole();
 #if DEBUG
                 Console.ReadKey();

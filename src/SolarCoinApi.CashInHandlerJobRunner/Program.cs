@@ -4,6 +4,7 @@ using SolarCoinApi.Common;
 using SolarCoinApi.Common.Triggers;
 using System.Runtime.Loader;
 using System.Threading;
+using Common.Log;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
@@ -12,6 +13,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         public static void Main(string[] args)
         {
             MonitoringJob monitoringJob = null;
+
+            Container container = null;
 
             try
             {
@@ -23,7 +26,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 var settings = new AppSettings<CashInHandlerSettings>().LoadFromEnvironment();
 #endif
                 
-                var container = new Container();
+                container = new Container();
 
                 Bootrsrap.Start(container, settings);
 
@@ -51,6 +54,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             {
                 monitoringJob?.Stop();
 
+                container?.GetInstance<ILog>().WriteErrorAsync("CashInHandlerJobRunner", "", "", e);
+                
                 e.PrintToConsole();
 
                 Console.ReadKey();
