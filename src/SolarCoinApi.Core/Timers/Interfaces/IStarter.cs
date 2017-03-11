@@ -8,5 +8,7 @@ namespace SolarCoinApi.Core.Timers.Interfaces
 	public interface IStarter
 	{
 		void Start();
+	    void Stop();
+	    string GetComponentName();
 	}
 }

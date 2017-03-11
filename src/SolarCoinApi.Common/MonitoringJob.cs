@@ -8,7 +8,7 @@ using Common.Log;
 
 namespace SolarCoinApi.Common
 {
-    public class MonitoringJob : TimerPeriodEx
+    public class MonitoringJob : TimerPeriod
     {
         private const int TimerPeriodSeconds = 10;
 

@@ -5,20 +5,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Runtime.Loader;
 using System.Threading;
+using SolarCoinApi.Core.Timers.Interfaces;
 
 namespace SolarCoinApi.Common
 {
     public class JobsRunner
     {
-        private List<TimerPeriodEx> _jobs;
+        private List<IStarter> _jobs;
         private bool _startedWatching = false;
 
         public JobsRunner()
         {
-            _jobs = new List<TimerPeriodEx>();
+            _jobs = new List<IStarter>();
         }
 
-        public void AddJob(TimerPeriodEx job)
+        public void AddJob(IStarter job)
         {
             if (_startedWatching)
                 throw new Exception($"Could not add {job.GetComponentName()} to the list of to-watch jobs: already watching. Use ${nameof(AddJob)} before ${nameof(StartAndWatch)}!");
@@ -67,7 +68,7 @@ namespace SolarCoinApi.Common
 
                 Console.WriteLine("Waiting for all jobs to complete...");
 
-                await Task.WhenAll(_jobs.Select(x => x.CurrentIteration ?? Task.CompletedTask).ToArray());
+                await Task.WhenAll(_jobs.OfType<TimerPeriodEx>().Select(x => x.CurrentIteration ?? Task.CompletedTask).ToArray());
 
                 Console.WriteLine("All jobs stopped and completed.");
 
