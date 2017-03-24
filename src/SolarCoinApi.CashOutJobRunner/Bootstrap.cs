@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using SimpleInjector;
 using SolarCoinApi.Common;
-using SolarCoinApi.Common.Triggers.Bindings;
 using SolarCoinApi.Core;
 using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson.JsonRpc;
@@ -12,6 +11,7 @@ using System.Threading.Tasks;
 using AzureStorage.Queue;
 using AzureStorage.Tables;
 using Common.Log;
+using Lykke.JobTriggers.Triggers.Bindings;
 
 namespace SolarCoinApi.CashOutJobRunner
 {

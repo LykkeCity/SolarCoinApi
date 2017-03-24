@@ -2,10 +2,10 @@
 using SolarCoinApi.Common;
 using SolarCoinApi.RpcJson.JsonRpc;
 using SimpleInjector;
-using SolarCoinApi.Common.Triggers;
 using System.Runtime.Loader;
 using System.Threading;
 using Common.Log;
+using Lykke.JobTriggers.Triggers;
 
 namespace SolarCoinApi.CashOutJobRunner
 {
@@ -54,7 +54,7 @@ namespace SolarCoinApi.CashOutJobRunner
                     end.WaitOne();
                 };
 
-                triggerHost.StartAndBlock();
+                triggerHost.Start().GetAwaiter().GetResult();
 
                 end.Set();
             }

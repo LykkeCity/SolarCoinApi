@@ -1,10 +1,10 @@
 ﻿using System;
 using SimpleInjector;
 using SolarCoinApi.Common;
-using SolarCoinApi.Common.Triggers;
 using System.Runtime.Loader;
 using System.Threading;
 using Common.Log;
+using Lykke.JobTriggers.Triggers;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
@@ -45,7 +45,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                     end.WaitOne();
                 };
 
-                triggerHost.StartAndBlock();
+                triggerHost.Start().GetAwaiter().GetResult();
 
                 end.Set();
 

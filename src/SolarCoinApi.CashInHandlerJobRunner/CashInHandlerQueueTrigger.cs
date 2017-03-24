@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using AzureStorage;
 using AzureStorage.Queue;
 using Common.Log;
-using SolarCoinApi.Common.Triggers.Attributes;
+using Lykke.JobTriggers.Triggers.Attributes;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {

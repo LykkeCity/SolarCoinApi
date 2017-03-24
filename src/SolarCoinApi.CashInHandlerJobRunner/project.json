@@ -19,11 +19,12 @@
     "SimpleInjector": "3.3.1",
     "MongoDB.Driver": "2.3.0",
     "SolarCoinApi.RpcJson": "1.0-*",
-    "SolarCoinApi.Common": "1.0.0-*"
+    "SolarCoinApi.Common": "1.0.0-*",
+    "Lykke.JobTriggers": "1.0.10"
   },
 
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "imports": [
         "dotnet5.6",
         "portable-net45+win8"

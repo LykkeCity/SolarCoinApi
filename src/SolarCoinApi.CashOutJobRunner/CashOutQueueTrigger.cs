@@ -1,7 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using SolarCoinApi.CashOutJobRunner;
-using SolarCoinApi.Common.Triggers.Attributes;
 using SolarCoinApi.Core;
 using SolarCoinApi.RpcJson.JsonRpc;
 using System;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AzureStorage;
 using Common.Log;
+using Lykke.JobTriggers.Triggers.Attributes;
 
 namespace SolarCoinApi.CashOutJobRunner
 {
