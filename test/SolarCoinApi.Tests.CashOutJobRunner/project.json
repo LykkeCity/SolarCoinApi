@@ -2,11 +2,15 @@
   "version": "1.0.0-*",
 
   "dependencies": {
+      "Microsoft.NETCore.App": {
+        "type": "platform",
+        "version": "1.1.0"
+    },
     "dotnet-test-nunit": "3.4.0-beta-1",
-    "MongoDB.Driver": "2.3.0",
-    "NETStandard.Library": "1.6.0",
-    "NSubstitute": "2.0.0-rc",
-    "NUnit": "3.5.0",
+    "MongoDB.Driver": "2.4.3",
+    "NETStandard.Library": "1.6.1",
+    "NSubstitute": "2.0.2",
+    "NUnit": "3.6.1",
     "SolarCoinApi.CashOutJobRunner": "1.0-*",
     "SolarCoinApi.Core": "1.0-*",
     "SolarCoinApi.RpcJson": "1.0-*"
@@ -16,15 +20,10 @@
   "frameworks": {
     "netcoreapp1.1": {
       "imports": [
-        "netcoreapp1.0",
+        "dnxcore50",
         "portable-net45+win8"
-      ],
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.1-*",
-          "type": "platform"
-        }
-      }
+      ]
+      
     }
   }
 }

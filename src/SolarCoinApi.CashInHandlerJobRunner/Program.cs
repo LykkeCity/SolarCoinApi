@@ -1,21 +1,26 @@
 ﻿using System;
-using SimpleInjector;
 using SolarCoinApi.Common;
 using System.Runtime.Loader;
 using System.Threading;
+using System.Threading.Tasks;
+using Autofac.Core;
+using Autofac.Extensions.DependencyInjection;
 using Common.Log;
 using Lykke.JobTriggers.Triggers;
+using Microsoft.Extensions.DependencyInjection;
+using SolarCoinApi.CashInHandlerJobRunner;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
     public class Program
     {
+        private static AutofacServiceProvider ServiceProvider { get; set; }
+        private static TriggerHost TriggerHost { set; get; }
+
+        private static string ComponentName = "SolarCoinApi.CashInHandler";
+
         public static void Main(string[] args)
         {
-            MonitoringJob monitoringJob = null;
-
-            Container container = null;
-
             try
             {
                 Console.Title = "SolarCoin CashIn Handler job";
@@ -25,40 +30,33 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 #elif RELEASE
                 var settings = new AppSettings<CashInHandlerSettings>().LoadFromEnvironment();
 #endif
+
+                ServiceProvider = new AutofacServiceProvider(Bootrsrap.ConfigureBuilder(ComponentName, settings).Build());
                 
-                container = new Container();
-
-                Bootrsrap.Start(container, settings);
-
-                monitoringJob = container.GetInstance<MonitoringJob>();
-                monitoringJob.Start();
-                
-                var triggerHost = new TriggerHost(container);
-
-                var end = new ManualResetEvent(false);
+                TriggerHost = new TriggerHost(ServiceProvider);
 
                 AssemblyLoadContext.Default.Unloading += ctx =>
                 {
                     Console.WriteLine("SIGTERM recieved");
-                    triggerHost.Cancel();
 
-                    end.WaitOne();
+                    TriggerHost.Cancel();
                 };
 
-                triggerHost.Start().GetAwaiter().GetResult();
-
-                end.Set();
+                TriggerHost.Start().GetAwaiter().GetResult();
 
             }
             catch (Exception e)
             {
-                monitoringJob?.Stop();
+                TriggerHost?.Cancel();
 
-                container?.GetInstance<ILog>().WriteErrorAsync("CashInHandlerJobRunner", "", "", e);
-                
+                Task.Delay(1000).GetAwaiter().GetResult();
+
+                ServiceProvider?.GetService<ILog>()?.WriteErrorAsync(ComponentName, "", "", e).GetAwaiter().GetResult();
+
                 e.PrintToConsole();
-
+#if DEBUG
                 Console.ReadKey();
+#endif
             }
 
         }

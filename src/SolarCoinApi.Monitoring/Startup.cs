@@ -102,8 +102,8 @@ namespace SolarCoinApi.Monitoring
         {
 
 #if DEBUG
-            var settings = new AppSettings<MonitoringSettings>().LoadFromEnvironment();
-            //var settings = new AppSettings<MonitoringSettings>().LoadFile("appsettings.Debug.json");
+            //var settings = new AppSettings<MonitoringSettings>().LoadFromEnvironment();
+            var settings = new AppSettings<MonitoringSettings>().LoadFile("appsettings.Debug.json");
 #else
             var settings = new AppSettings<MonitoringSettings>().LoadFromEnvironment();
 #endif

@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using AzureStorage;
 using AzureStorage.Queue;
 using Common.Log;
-using Lykke.JobTriggers.Triggers.Attributes;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
@@ -22,10 +21,12 @@ namespace SolarCoinApi.CashInHandlerJobRunner
         private string _hotWalletAddress;
         private decimal _txFee;
         private decimal _minTxAmount;
+        private string _component;
 
-        public CashInHandlerQueueTrigger(INoSQLTableStorage<WalletStorageEntity> generatedWallets, ILog log, IQueueExt txesQueue,
+        public CashInHandlerQueueTrigger(string component, INoSQLTableStorage<WalletStorageEntity> generatedWallets, ILog log, IQueueExt txesQueue,
             IJsonRpcClient rpcClient, ISlackNotifier slackNotifier, string hotWalletAddress, decimal txFee, decimal minTxAmount)
         {
+            _component = component + ".QueueTrigger";
             _generatedWallets = generatedWallets;
             _log = log;
             _txesQueue = txesQueue;
@@ -36,12 +37,11 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             _slackNotifier = slackNotifier;
         }
         
-        [QueueTrigger("solar-transit")]
         public async Task ReceiveMessage(TransitQueueMessage message)
         {
             try
             {
-                await _log.WriteInfoAsync("CashInHandlerQueueTrigger", "", message.TxId, "beginning to process");
+                await _log.WriteInfoAsync(_component, "", message.TxId, "beginning to process");
 
                 var ourVouts = new List<VoutEx>();
 
@@ -59,7 +59,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 // if none of the outputs where dedicated to our users, return;
                 if (ourVouts.Count == 0)
                 {
-                    await _log.WriteInfoAsync("CashInHandlerQueueTrigger", "", message.TxId, "didn't contain relevant addresses");
+                    await _log.WriteInfoAsync(_component, "", message.TxId, "didn't contain relevant addresses");
                     return;
                 }
 
@@ -80,7 +80,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                     var signedTx = await _rpcClient.SignRawTransaction(rawTx, userWallet.PrivateKey);
                     var sentTx = await _rpcClient.SendRawTransaction(signedTx.Hex);
 
-                    await _log.WriteInfoAsync("CashInHandlerQueueTrigger", "", message.TxId, "transferred. posting to queue.");
+                    await _log.WriteInfoAsync(_component, "", message.TxId, "transferred. posting to queue.");
 
                     await _txesQueue.PutRawMessageAsync(JsonConvert.SerializeObject(new QueueModel { Address = addr, Amount = changePerAddressInSlr, TxId = message.TxId }));
                 }
@@ -88,8 +88,8 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             }
             catch (Exception e)
             {
-                await _slackNotifier.Notify(new SlackMessage { Sender = "CashInHandlerQueueTrigger", Type = "Errors", Message = "Error occured during cashin handling" });
-                await _log.WriteErrorAsync("CashInHandlerQueueTrigger", "", message.TxId, e);
+                //await _slackNotifier.Notify(new SlackMessage { Sender = _component, Type = "Errors", Message = "Error occured during cashin handling" });
+                await _log.WriteErrorAsync(_component, "", message.TxId, e);
                 throw;
             }
         }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using SimpleInjector;
 using SolarCoinApi.Core;
 using SolarCoinApi.Core.Options;
 using SolarCoinApi.RpcJson.JsonRpc;
@@ -7,18 +6,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
+using Autofac.Core;
 using AzureStorage.Queue;
 using AzureStorage.Tables;
 using Common.Log;
-using Lykke.JobTriggers.Triggers.Bindings;
+using Lykke.JobTriggers.Extenstions;
 using SolarCoinApi.Common;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
     public static class Bootrsrap
     {
-        public static void Start(Container container, CashInHandlerSettings settings)
+        public static ContainerBuilder ConfigureBuilder(string componentName, CashInHandlerSettings settings)
         {
+            var builder = new ContainerBuilder();
+
             IConfigureOptions<LoggerOptions> configureOptions = new ConfigureOptions<LoggerOptions>(x =>
             {
                 x.ConnectionString = settings.Logger.ConnectionString;
@@ -29,15 +32,17 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 
             var loggerOptions = new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions });
 
-            container.RegisterSingleton<ILog>(() => { return new TableLogger(loggerOptions, settings.VerboseLogging); });
+            builder.Register(ctx => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name))).As<ISlackNotifier>().SingleInstance();
 
-            container.RegisterSingleton<IQueueExt>(() => { return new AzureQueueExt(settings.CashInQueue.ConnectionString, settings.CashInQueue.Name); });
+            builder.Register(ctx => new TableLogger(ctx.Resolve<ISlackNotifier>(), loggerOptions, settings.VerboseLogging)).As<ILog>().SingleInstance();
 
-            container.RegisterSingleton<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())));
+            builder.Register(ctx => new AzureQueueExt(settings.CashInQueue.ConnectionString, settings.CashInQueue.Name)).As<IQueueExt>().SingleInstance();
 
-            container.RegisterSingleton<IJsonRpcRawResponseFormatter, JsonRpcRawResponseFormatter>();
+            builder.Register(ctx => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, ctx.Resolve<ILog>()))).As<IMonitoringRepository>().SingleInstance();
 
-            container.RegisterSingleton<IJsonRpcRequestBuilder, JsonRpcRequestBuilder>();
+            builder.RegisterType<JsonRpcRawResponseFormatter>().As<IJsonRpcRawResponseFormatter>().SingleInstance();
+
+            builder.RegisterType<JsonRpcRequestBuilder>().As<IJsonRpcRequestBuilder>().SingleInstance();
 
             var rawRpcClientOptions = new ConfigureOptions<RpcWalletGeneratorOptions>(x =>
             {
@@ -46,34 +51,31 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 x.Username = settings.Rpc.Username;
             });
 
-            container.RegisterSingleton<IJsonRpcClientRaw>(() => { return new JsonRpcClientRaw(container.GetInstance<IJsonRpcRequestBuilder>(), container.GetInstance<ILog>(), new OptionsManager<RpcWalletGeneratorOptions>(new List<IConfigureOptions<RpcWalletGeneratorOptions>>() { rawRpcClientOptions })); });
+            builder.Register(ctx => new JsonRpcClientRaw(ctx.Resolve<IJsonRpcRequestBuilder>(), ctx.Resolve<ILog>(), new OptionsManager<RpcWalletGeneratorOptions>(new List<IConfigureOptions<RpcWalletGeneratorOptions>>() { rawRpcClientOptions }))).As<IJsonRpcClientRaw>().SingleInstance();
 
-            container.RegisterSingleton<IJsonRpcClient>(() => new JsonRpcClient(container.GetInstance<IJsonRpcClientRaw>(), container.GetInstance<IJsonRpcRawResponseFormatter>(), container.GetInstance<ILog>()));
+            builder.Register(ctx => new JsonRpcClient(ctx.Resolve<IJsonRpcClientRaw>(), ctx.Resolve<IJsonRpcRawResponseFormatter>(), ctx.Resolve<ILog>())).As<IJsonRpcClient>().SingleInstance();
 
-            container.RegisterSingleton<IQueueReaderFactory>(() => new AzureQueueReaderFactory(settings.TransitQueue.ConnectionString));
-
-            container.RegisterSingleton<ISlackNotifier>(() => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name)));
-
-            container.RegisterSingleton<CashInHandlerQueueTrigger>(
-                () => new CashInHandlerQueueTrigger(
+            builder.Register(
+                ctx => new CashInHandlerQueueTrigger(
+                    componentName,
                     new AzureTableStorage<WalletStorageEntity>(
-                        settings.GeneratedWallets.ConnectionString, settings.GeneratedWallets.Name, container.GetInstance<ILog>()),
-                        container.GetInstance<ILog>(),
-                        container.GetInstance<IQueueExt>(),
-                        container.GetInstance<IJsonRpcClient>(),
-                        container.GetInstance<ISlackNotifier>(),
+                        settings.GeneratedWallets.ConnectionString, settings.GeneratedWallets.Name, ctx.Resolve<ILog>()),
+                        ctx.Resolve<ILog>(),
+                        ctx.Resolve<IQueueExt>(),
+                        ctx.Resolve<IJsonRpcClient>(),
+                        ctx.Resolve<ISlackNotifier>(),
                         settings.HotWalletAddress,
                         settings.CashInTxFee,
-                        settings.CashInMinTxAmount));
+                        settings.CashInMinTxAmount)).As<CashInHandlerQueueTrigger>().SingleInstance();
 
-            container.RegisterSingleton<MonitoringJob>(() => new MonitoringJob(
-                    "SolarCoinApi.CashInHandler",
-                    container.GetInstance<IMonitoringRepository>(),
-                    container.GetInstance<ILog>()));
+            builder.Register(ctx => new CashInHandlerMonitoringJob(
+                    componentName,
+                    ctx.Resolve<IMonitoringRepository>(),
+                    ctx.Resolve<ILog>())).As<CashInHandlerMonitoringJob>().SingleInstance();
 
-            container.RegisterSingleton<QueueTriggerBinding>();
-            
-            container.Verify();
+            builder.AddTriggers(pool => pool.AddDefaultConnection(settings.CashInQueue.ConnectionString));
+
+            return builder;
         }
     }
 }

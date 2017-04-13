@@ -1,6 +1,11 @@
-﻿using SimpleInjector;
-using System;
+﻿using System;
+using System.Runtime.Loader;
+using System.Threading.Tasks;
+using Autofac.Core;
+using Autofac.Extensions.DependencyInjection;
 using Common.Log;
+using Lykke.JobTriggers.Triggers;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using SolarCoinApi.Core;
 using SolarCoinApi.Common;
@@ -9,16 +14,15 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 {
     public class Program
     {
+        private static AutofacServiceProvider ServiceProvider { get; set; }
+        private static TriggerHost TriggerHost { set; get; }
+
+        private static string ComponentName = "SolarCoinApi.CashInGrabber";
+
         public static void Main(string[] args)
         {
-            MonitoringJob monitoringJob = null;
-
-            Container container = null;
-
             try
             {
-                container = new Container();
-
 #if DEBUG
                 var settings = new AppSettings<CashInGrabberSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
@@ -26,26 +30,33 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 #endif
                 BsonClassMap.RegisterClassMap<TransactionMongoEntity>();
 
-                Bootrsrap.Start(container, settings);
-                
-                var job = container.GetInstance<CashInGrabberJob>();
-
-                monitoringJob = container.GetInstance<MonitoringJob>();
+                ServiceProvider = new AutofacServiceProvider(Bootrsrap.ConfigureBuilder(ComponentName, settings).Build());
 
                 var jobsRunner = new JobsRunner();
 
-                jobsRunner.AddJob(job);
-                jobsRunner.AddJob(monitoringJob);
+                jobsRunner.AddJob(ServiceProvider.GetService<CashInGrabberJob>());
 
-                jobsRunner.StartAndWatch().GetAwaiter().GetResult();
+                TriggerHost = new TriggerHost(ServiceProvider);
+
+                AssemblyLoadContext.Default.Unloading += ctx =>
+                {
+                    Console.WriteLine("SIGTERM recieved");
+
+                    TriggerHost.Cancel();
+                };
+
+
+                Task.WhenAll(jobsRunner.StartAndWatch(), TriggerHost.Start()).GetAwaiter().GetResult();
                 
 
             }
             catch (Exception e)
             {
-                monitoringJob?.Stop();
+                TriggerHost?.Cancel();
 
-                container?.GetInstance<ILog>().WriteErrorAsync("CashInGrabberJobRunner", "", "", e);
+                //Task.Delay(5000).GetAwaiter().GetResult();
+
+                ServiceProvider?.GetService<ILog>()?.WriteErrorAsync(ComponentName, "", "", e);
                 
                 e.PrintToConsole();
 #if DEBUG

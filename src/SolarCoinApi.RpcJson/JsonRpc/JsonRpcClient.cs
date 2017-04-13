@@ -10,6 +10,7 @@ using Common.Log;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using SolarCoinApi.Core.Options;
+using SolarCoinApi.RpcJson.JsonRpc;
 
 namespace SolarCoinApi.RpcJson.JsonRpc
 {
@@ -135,6 +136,9 @@ namespace SolarCoinApi.RpcJson.JsonRpc
         Task<string> SendToAddress(string address, decimal amount);
         Task<ImportPrivateKeyResponseModel> ImportPrivateKey(string privkey);
         Task<int> GetBlockCount();
+        Task<List<ListTransactionsItemResponseModel>> ListTransactions(int count);
+        Task<string> GetRawTransaction(string hex);
+
     }
 
     public class JsonRpcClient : IJsonRpcClient
@@ -184,6 +188,14 @@ namespace SolarCoinApi.RpcJson.JsonRpc
         public Task<ImportPrivateKeyResponseModel> ImportPrivateKey(string privkey)
         {
             return this.Invoke<ImportPrivateKeyResponseModel>("importprivkey", privkey);
+        }
+        public Task<List<ListTransactionsItemResponseModel>> ListTransactions(int count)
+        {
+            return this.Invoke<List<ListTransactionsItemResponseModel>>("listtransactions", "", count, 0);
+        }
+        public Task<string> GetRawTransaction(string hex)
+        {
+            return this.Invoke<string>("getrawtransaction", hex);
         }
 
         private async Task<T> Invoke<T>(string method, params object[] args)
@@ -265,5 +277,24 @@ namespace SolarCoinApi.RpcJson.JsonRpc
     public class ImportPrivateKeyResponseModel
     {
         
+    }
+    
+    public class ListTransactionsItemResponseModel
+    {
+        public string Account { set; get; }
+        public string Address { set; get; }
+        public string Category { set; get; }
+        public string Fee { set; get; }
+        public string Amount { set; get; }
+        [JsonProperty("tx-comment")]
+        public string TxComment { set; get; }
+        public string Confirmations { set; get; }
+        private string Generated { set; get; }
+        public string BlockHash { set; get; }
+        public string BlockIndex { set; get; }
+        public string BlockTime { set; get; }
+        public string TxId { set; get; }
+        public string Time { set; get; }
+        public string TimeReceived { set; get; }
     }
 }

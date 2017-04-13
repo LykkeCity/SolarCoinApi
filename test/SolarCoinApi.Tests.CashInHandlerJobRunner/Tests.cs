@@ -49,7 +49,7 @@ namespace SolarCoinApi.Tests.CashInHandlerJobRunner
             var fakeLogger = Substitute.For<ILog>();
 
 
-            var queueTrigger = new CashInHandlerQueueTrigger(generatedWallets, fakeLogger, fakeTxesQueue, fakeRpcClient, fakeSlackNotifier, hotWalletAddress, txFee, minTxAmount);
+            var queueTrigger = new CashInHandlerQueueTrigger("SolarCoinApi.Test.CashInHandlerJobRunner", generatedWallets, fakeLogger, fakeTxesQueue, fakeRpcClient, fakeSlackNotifier, hotWalletAddress, txFee, minTxAmount);
 
             
 

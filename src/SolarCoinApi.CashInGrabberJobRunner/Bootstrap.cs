@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using SimpleInjector;
 using SolarCoinApi.Core;
 using SolarCoinApi.Core.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
+using Autofac.Core;
 using AzureStorage.Queue;
 using AzureStorage.Tables;
 using Common.Log;
@@ -16,8 +17,10 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 {
     public static class Bootrsrap
     {
-        public static void Start(Container container, CashInGrabberSettings settings)
+        public static ContainerBuilder ConfigureBuilder(string componentName, CashInGrabberSettings settings)
         {
+            var builder = new ContainerBuilder();
+
             IConfigureOptions<LoggerOptions> configureOptions = new ConfigureOptions<LoggerOptions>(x =>
             {
                 x.ConnectionString = settings.Logger.ConnectionString;
@@ -28,33 +31,34 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
             var loggerOptions = new OptionsManager<LoggerOptions>(new List<IConfigureOptions<LoggerOptions>> { configureOptions });
 
-            container.Register<ILog>(() => { return new TableLogger(loggerOptions, settings.VerboseLogging); }, Lifestyle.Singleton);
+            builder.Register(ctx => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name))).As<ISlackNotifier>().SingleInstance();
+
+            builder.Register(ctx => new TableLogger(ctx.Resolve<ISlackNotifier>(), loggerOptions, settings.VerboseLogging)).As<ILog>().SingleInstance();
             
             var client = new MongoClient($"{settings.Mongo.Host}:{settings.Mongo.Port}");
             IMongoDatabase mongo = client.GetDatabase(settings.Mongo.DbName);
             var collection = mongo.GetCollection<TransactionMongoEntity>(settings.Mongo.CollectionName);
 
-            container.Register<IQueueExt>(() => { return new AzureQueueExt(settings.TransitQueue.ConnectionString, settings.TransitQueue.Name); }, Lifestyle.Singleton);
+            builder.Register(ctx => new AzureQueueExt(settings.TransitQueue.ConnectionString, settings.TransitQueue.Name)).As<IQueueExt>().SingleInstance();
 
-            container.Register<IMonitoringRepository>(() => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, container.GetInstance<ILog>())), Lifestyle.Singleton);
+            builder.Register(ctx => new MonitoringRepository(new AzureTableStorage<MonitoringEntity>(settings.Monitoring.ConnectionString, settings.Monitoring.Name, ctx.Resolve<ILog>()))).As<IMonitoringRepository>().SingleInstance();
 
-            container.Register<ISlackNotifier>(() => new SlackNotifier(new AzureQueueExt(settings.SlackQueue.ConnectionString, settings.SlackQueue.Name)), Lifestyle.Singleton);
-
-            container.Register<CashInGrabberJob>(() => new CashInGrabberJob(
-                "CashInGrabber",
+            builder.Register(ctx => new CashInGrabberJob(
+                componentName,
                 settings.CashInPeriod,
-                container.GetInstance<ILog>(),
+                ctx.Resolve<ILog>(),
                 collection,
-                container.GetInstance<IQueueExt>(),
-                container.GetInstance<ISlackNotifier>(),
-                settings.CashInThreshold), Lifestyle.Singleton);
+                ctx.Resolve<IQueueExt>(),
+                ctx.Resolve<ISlackNotifier>(),
+                settings.CashInThreshold)).As<CashInGrabberJob>().SingleInstance();
 
-            container.Register<MonitoringJob>(() => new MonitoringJob(
-                "SolarCoinApi.CashInGrabber",
-                container.GetInstance<IMonitoringRepository>(),
-                container.GetInstance<ILog>()
-                ), Lifestyle.Singleton);
+            builder.Register(ctx => new CashInGrabberMonitoringJob(
+                componentName,
+                ctx.Resolve<IMonitoringRepository>(),
+                ctx.Resolve<ILog>()
+                )).As<CashInGrabberMonitoringJob>().SingleInstance();
 
+            return builder;
         }
     }
 }

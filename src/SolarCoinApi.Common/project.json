@@ -2,22 +2,24 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "Lykke.AzureStorage": "1.2.7",
-    "NETStandard.Library": "1.6.0",
-    "Newtonsoft.Json": "9.0.1",
+    "Lykke.AzureStorage": "1.2.18",
+    "NETStandard.Library": "1.6.1",
+    "Newtonsoft.Json": "10.0.2",
     "SolarCoinApi.Core": "1.0.0-*",
-    "System.ComponentModel.Annotations": "4.1.0",
-    "System.ComponentModel.TypeConverter": "4.1.0",
-    "System.Reflection": "4.1.0",
-    "System.Runtime.Loader": "4.0.0"
+    "System.ComponentModel.Annotations": "4.3.0",
+    "System.ComponentModel.TypeConverter": "4.3.0",
+    "System.Reflection": "4.3.0",
+    "System.Runtime.Loader": "4.3.0"
   },
 
   "frameworks": {
-    "netcoreapp1.0": {
-      "imports": [
-        "dnxcore50",
-        "portable-net451+win8"
-      ]
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.1.0"
+        }
+      }
     }
   }
 }

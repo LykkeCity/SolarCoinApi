@@ -17,11 +17,14 @@ namespace SolarCoinApi.Common
         private readonly INoSQLTableStorage<LogEntity> _warningTableStorage;
         private readonly INoSQLTableStorage<LogEntity> _infoTableStorage;
         private readonly IOptions<LoggerOptions> _options;
+        private readonly ISlackNotifier _notifier;
         private bool _verbose;
 
-        public TableLogger(IOptions<LoggerOptions> options, bool verbose = false)
+        public TableLogger(ISlackNotifier notifier, IOptions<LoggerOptions> options, bool verbose = false)
         {
             _options = options;
+
+            _notifier = notifier;
 
             _errorTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.ErrorTableName, null);
             _warningTableStorage = new AzureTableStorage<LogEntity>(_options.Value.ConnectionString, _options.Value.WarningTableName, null);
@@ -55,14 +58,35 @@ namespace SolarCoinApi.Common
             return Insert("warning", component, process, context, null, null, info, dateTime);
         }
 
-        public Task WriteErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
+        public async Task WriteErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
-            return Insert("error", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
+            try
+            {
+                await WriteErrorToSlack("SolarCoinApi: " + component);
+            }
+            catch (Exception e)
+            {
+                
+            }
+            await Insert("error", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
         }
 
-        public Task WriteFatalErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
+        public async Task WriteFatalErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
-            return Insert("fatalerror", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
+            try
+            {
+                await WriteErrorToSlack("SolarCoinApi: " + component);
+            }
+            catch (Exception e)
+            {
+
+            }
+            await Insert("fatalerror", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
+        }
+
+        private Task WriteErrorToSlack(string component)
+        {
+            return _notifier.Notify(new SlackMessage { Sender = component, Type = "Errors", Message = "Error happened, please see logs for details"});
         }
     }
 }

@@ -50,5 +50,53 @@ namespace SolarCoinApi.Monitoring.Controllers
                 return StatusCode(500);
             }
         }
+
+        /// <summary>
+        /// Lists transactions sent/received by the node's default account
+        /// </summary>
+        /// <param name="count">Amount of transactions</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("listrawtransactions/{count}")]
+        public async Task<IActionResult> ListTransactions(int count)
+        {
+            try
+            {
+               return Json(await _client.ListTransactions(count));
+            }
+            catch (HttpRequestException e)
+            {
+                return Json(new RpcResponseModel { RpcIsAlive = false, RpcBlockCount = -1 });
+            }
+            catch (Exception e)
+            {
+                await _logger.WriteErrorAsync("SolarCoinApi.Monitoring.RpcController", "ListTransactions", "", e);
+                return StatusCode(500);
+            }
+        }
+
+        /// <summary>
+        /// Gets a hex of a given transaction
+        /// </summary>
+        /// <param name="txId">Transaction hash</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("getrawtransaction/{txId}")]
+        public async Task<IActionResult> GetRawTransaction(string txId)
+        {
+            try
+            {
+                return Json(await _client.GetRawTransaction(txId));
+            }
+            catch (HttpRequestException e)
+            {
+                return Json(new RpcResponseModel { RpcIsAlive = false, RpcBlockCount = -1 });
+            }
+            catch (Exception e)
+            {
+                await _logger.WriteErrorAsync("SolarCoinApi.Monitoring.RpcController", "GetRawTransaction", "", e);
+                    return StatusCode(500);
+            }
+        }
     }
 }

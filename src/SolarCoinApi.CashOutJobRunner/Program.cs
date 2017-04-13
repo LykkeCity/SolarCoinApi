@@ -1,22 +1,27 @@
 ﻿using System;
 using SolarCoinApi.Common;
 using SolarCoinApi.RpcJson.JsonRpc;
-using SimpleInjector;
 using System.Runtime.Loader;
 using System.Threading;
+using System.Threading.Tasks;
+using Autofac;
+using Autofac.Core;
+using Autofac.Extensions.DependencyInjection;
 using Common.Log;
 using Lykke.JobTriggers.Triggers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SolarCoinApi.CashOutJobRunner
 {
     public class Program
     {
+        private static AutofacServiceProvider ServiceProvider { get; set; }
+        private static TriggerHost TriggerHost { set; get; }
+
+        private static string ComponentName = "SolarCoinApi.CashOut";
+
         public static void Main(string[] args)
         {
-            MonitoringJob monitoringJob = null;
-
-            Container container = null;
-
             try
             {
                 Console.Title = "SolarCoin CashOut job";
@@ -26,43 +31,36 @@ namespace SolarCoinApi.CashOutJobRunner
 #elif RELEASE
                 var settings = new AppSettings<CashOutSettings>().LoadFromEnvironment();
 #endif
-
-                container = new Container();
-
-                Bootstrap.Start(container, settings);
-
-                var rpcClient = container.GetInstance<IJsonRpcClient>();
+                
+                ServiceProvider = new AutofacServiceProvider(Bootstrap.ConfigureBuilder(ComponentName, settings).Build());
+                
+                var rpcClient = ServiceProvider.GetService<IJsonRpcClient>();
                 
                 Console.WriteLine("Importing private key to the local node - this may take up to several minutes...");
 
-                rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).Wait();
+                rpcClient.ImportPrivateKey(settings.HotWalletPrivKey).GetAwaiter().GetResult();
 
                 Console.WriteLine("The key was imported!");
-                
-                monitoringJob = container.GetInstance<MonitoringJob>();
-                monitoringJob.Start();
-                
-                var triggerHost = new TriggerHost(container);
 
-                var end = new ManualResetEvent(false);
-
+                TriggerHost = new TriggerHost(ServiceProvider);
+                
                 AssemblyLoadContext.Default.Unloading += ctx =>
                 {
                     Console.WriteLine("SIGTERM recieved");
-                    triggerHost.Cancel();
 
-                    end.WaitOne();
+                    TriggerHost.Cancel();
                 };
 
-                triggerHost.Start().GetAwaiter().GetResult();
+                TriggerHost.Start().GetAwaiter().GetResult();
 
-                end.Set();
             }
             catch(Exception e)
             {
-                monitoringJob?.Stop();
+                TriggerHost?.Cancel();
 
-                container?.GetInstance<ILog>().WriteErrorAsync("CashOutJobRunner", "", "", e);
+                Task.Delay(1000).GetAwaiter().GetResult();
+
+                ServiceProvider?.GetService<ILog>()?.WriteErrorAsync(ComponentName, "", "", e).GetAwaiter().GetResult();
                 
                 e.PrintToConsole();
 #if DEBUG

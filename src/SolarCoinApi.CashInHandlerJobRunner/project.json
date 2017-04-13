@@ -14,13 +14,12 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.1"
+      "version": "1.1.0"
     },
-    "SimpleInjector": "3.3.1",
-    "MongoDB.Driver": "2.3.0",
+    "Lykke.JobTriggers": "1.1.2",
     "SolarCoinApi.RpcJson": "1.0-*",
     "SolarCoinApi.Common": "1.0.0-*",
-    "Lykke.JobTriggers": "1.0.10"
+    "MongoDB.Driver": "2.4.3"
   },
 
   "frameworks": {

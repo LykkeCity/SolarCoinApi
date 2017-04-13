@@ -35,11 +35,11 @@ namespace SolarCoinApi.Tests.CashOutJobRunner
 
             var fakeSlackNotifier = Substitute.For<ISlackNotifier>();
 
-            var queueTrigger = new CashOutQueueTrigger(fakeRpcClient, fakeTxesStorage, fakeLogger, fakeSlackNotifier);
+            var queueTrigger = new CashOutQueueTrigger("SolarCoinApi.Tests.CashOut", fakeRpcClient, fakeTxesStorage, fakeLogger, fakeSlackNotifier);
 
 
             //Act
-            await queueTrigger.ReceiveMessage(message);
+            await queueTrigger.Process(message);
 
 
             //Assert
@@ -71,11 +71,11 @@ namespace SolarCoinApi.Tests.CashOutJobRunner
 
             var fakeSlackNotifier = Substitute.For<ISlackNotifier>();
 
-            var queueTrigger = new CashOutQueueTrigger(fakeRpcClient, fakeTxesStorage, fakeLogger, fakeSlackNotifier);
+            var queueTrigger = new CashOutQueueTrigger("SolarCoinApi.Tests.CashOut", fakeRpcClient, fakeTxesStorage, fakeLogger, fakeSlackNotifier);
 
 
             //Act
-            await queueTrigger.ReceiveMessage(message);
+            await queueTrigger.Process(message);
 
 
             //Assert
