@@ -46,7 +46,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 };
 
 
-                Task.WhenAll(jobsRunner.StartAndWatch(), TriggerHost.Start()).GetAwaiter().GetResult();
+                Task.WhenAll(Task.Run(async () => await jobsRunner.StartAndWatch()), TriggerHost.Start()).GetAwaiter().GetResult();
                 
 
             }

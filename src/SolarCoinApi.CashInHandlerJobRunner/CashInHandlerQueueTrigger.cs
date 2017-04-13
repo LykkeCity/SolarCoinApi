@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AzureStorage;
 using AzureStorage.Queue;
 using Common.Log;
+using Lykke.JobTriggers.Triggers.Attributes;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
@@ -37,6 +38,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
             _slackNotifier = slackNotifier;
         }
         
+        [QueueTrigger("solar-transit")]
         public async Task ReceiveMessage(TransitQueueMessage message)
         {
             try

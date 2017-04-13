@@ -11,6 +11,7 @@ using Autofac.Core;
 using AzureStorage.Queue;
 using AzureStorage.Tables;
 using Common.Log;
+using Lykke.JobTriggers.Extenstions;
 using SolarCoinApi.Common;
 
 namespace SolarCoinApi.CashInGrabberJobRunner
@@ -57,6 +58,8 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 ctx.Resolve<IMonitoringRepository>(),
                 ctx.Resolve<ILog>()
                 )).As<CashInGrabberMonitoringJob>().SingleInstance();
+
+            builder.AddTriggers();
 
             return builder;
         }
