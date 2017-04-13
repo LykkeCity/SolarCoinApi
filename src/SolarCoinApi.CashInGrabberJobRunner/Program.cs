@@ -56,7 +56,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 
                 //Task.Delay(5000).GetAwaiter().GetResult();
 
-                ServiceProvider?.GetService<ILog>()?.WriteErrorAsync(ComponentName, "", "", e);
+                ServiceProvider?.GetService<ILog>()?.WriteErrorAsync(ComponentName, "", "", e).GetAwaiter().GetResult();
                 
                 e.PrintToConsole();
 #if DEBUG
