@@ -1,71 +1,64 @@
-﻿using SolarCoinApi.Core.Timers;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MongoDB.Driver;
-using System.Linq;
 using SolarCoinApi.Core;
 using Newtonsoft.Json;
 using System;
 using AzureStorage.Queue;
 using Common.Log;
+using Lykke.JobTriggers.Triggers.Attributes;
 
 namespace SolarCoinApi.CashInGrabberJobRunner
 {
-    public class CashInGrabberJob : TimerPeriodEx
+    public class CashInGrabberJob
     {
         private IMongoCollection<TransactionMongoEntity> _blockchainExplorer;
         private IQueueExt _transitQueue;
         private int _threshold;
-        private int _normalPeriodMs;
-        private ISlackNotifier _slackNotifier;
+        private string _componentName;
+        private ILog _log;
 
-        public CashInGrabberJob(string componentName, int periodMs, ILog log, IMongoCollection<TransactionMongoEntity> blockchainExplorer, IQueueExt transitQueue, ISlackNotifier slackNotifier, int threshold) : base(componentName + ".Job", periodMs, log)
+        public CashInGrabberJob(string componentName, ILog log, IMongoCollection<TransactionMongoEntity> blockchainExplorer, IQueueExt transitQueue, int threshold)
         {
+            _componentName = componentName + ".Job";
             _blockchainExplorer = blockchainExplorer;
             _transitQueue = transitQueue;
             _threshold = threshold;
-            _normalPeriodMs = periodMs;
-            _slackNotifier = slackNotifier;
+            _log = log;
         }
 
-        public override async Task Execute()
+        [TimerTrigger("00:00:10")]
+        public async Task Execute()
         {
+            await _log.WriteInfoAsync(_componentName, "", "", "Begining to process");
+            
             var newTxes = _blockchainExplorer.Find(Builders<TransactionMongoEntity>.Filter.Exists(d => d.WasProcessed, false))
               .Limit(_threshold)
               .ToList();
-
-            if (newTxes.Count == 0)
-            {
-                await _log.WriteInfoAsync(GetComponentName(), "", "", "No unprocessed tx-es found. Reseting period to normal");
-                UpdatePeriod(_normalPeriodMs);
-                return;
-            }
-
-            if (newTxes.Count == _threshold)
-            {
-                await _log.WriteInfoAsync(GetComponentName(), "", "", "Threshold reached. Minifying period.");
-                UpdatePeriod(0);
-            }
-
-            if (newTxes.Count < _threshold)
-            {
-                await _log.WriteInfoAsync(GetComponentName(), "", "", $"{newTxes.Count()} unprocessed tx-es found. Reseting period to normal. Processing...");
-                UpdatePeriod(_normalPeriodMs);
-            }
+            
 
             foreach (var tx in newTxes)
             {
-                await _log.WriteInfoAsync(GetComponentName(), "", tx.TxId, "Preparing to process");
+                try
+                {
+                    await _log.WriteInfoAsync(_componentName, "", tx.TxId, "Preparing to process");
 
-                await _transitQueue.PutRawMessageAsync(JsonConvert.SerializeObject(tx.ToTransitQueueMessage()));
+                    await _transitQueue.PutRawMessageAsync(JsonConvert.SerializeObject(tx.ToTransitQueueMessage()));
 
-                var filter = Builders<TransactionMongoEntity>.Filter.Eq("txid", tx.TxId);
+                    var filter = Builders<TransactionMongoEntity>.Filter.Eq("txid", tx.TxId);
 
-                var update = Builders<TransactionMongoEntity>.Update.Set("wasprocessed", true);
+                    var update = Builders<TransactionMongoEntity>.Update.Set("wasprocessed", true);
 
-                await _blockchainExplorer.UpdateOneAsync(filter, update);
+                    await _blockchainExplorer.UpdateOneAsync(filter, update);
+
+                    await _log.WriteInfoAsync(_componentName, "", tx.TxId, "Successfully processed");
+                }
+                catch (Exception e)
+                {
+                    await _log.WriteErrorAsync(_componentName, "", tx.TxId, e);
+                }
             }
 
-            await _log.WriteInfoAsync(GetComponentName(), "", "", $"{newTxes.Count()} tx-es successfully processed!");
+            await _log.WriteInfoAsync(_componentName, "", "", $"{newTxes.Count} tx-es successfully processed!");
         }
     }
 }

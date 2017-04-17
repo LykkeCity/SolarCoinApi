@@ -1,31 +1,37 @@
-﻿using SolarCoinApi.Common;
-using SolarCoinApi.Core.Options;
-using SolarCoinApi.Core.Settings;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SolarCoinApi.Common;
+using SolarCoinApi.Core.Repositories;
+using SolarCoinApi.Core.Settings;
 
-namespace SolarCoinApi.CashInGrabberJobRunner
+namespace SolarCoinApi.Alerts
 {
-    public class CashInGrabberSettings : IValidatable
+    public class AlertsSettings : IValidatable
     {
         public LoggerSettings Logger { set; get; }
         public MongoSettings Mongo { set; get; }
         public QueueSettings TransitQueue { set; get; }
+        public QueueSettings CashOutQueue { set; get; }
         public QueueSettings SlackQueue { set; get; }
+        public QueueSettings EmailQueue { set; get; }
         public TableSettings Monitoring { set; get; }
         public bool VerboseLogging { set; get; }
-        public int CashInThreshold { get; set; }
 
         public void Validate()
         {
+
             if (Logger == null)
                 throw new Exception("Logger section should be present");
             if (Mongo == null)
                 throw new Exception("Mongo section should be present");
             if (TransitQueue == null)
                 throw new Exception("Transit Queue section should be present");
+            if (CashOutQueue == null)
+                throw new Exception("CashOut Queue section should be present");
+            if (EmailQueue == null)
+                throw new Exception("Email Queue section should be present");
             if (SlackQueue == null)
                 throw new Exception("Slack Queue section should be present");
             if (Monitoring == null)
@@ -44,6 +50,11 @@ namespace SolarCoinApi.CashInGrabberJobRunner
                 throw new Exception("Transit Queue Connection String should be present");
             if (string.IsNullOrWhiteSpace(TransitQueue.Name))
                 throw new Exception("Transit Queue should be present");
+
+            if (string.IsNullOrWhiteSpace(CashOutQueue.ConnectionString))
+                throw new Exception("Cash Out Queue Connection String should be present");
+            if (string.IsNullOrWhiteSpace(CashOutQueue.Name))
+                throw new Exception("Cash Out Queue should be present");
 
             if (string.IsNullOrWhiteSpace(SlackQueue.ConnectionString))
                 throw new Exception("Slack Queue Connection String should be present");

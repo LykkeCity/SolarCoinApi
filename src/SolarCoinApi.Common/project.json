@@ -3,6 +3,7 @@
 
   "dependencies": {
     "Lykke.AzureStorage": "1.2.18",
+    "Lykke.EmailProvider": "1.1.1",
     "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "10.0.2",
     "SolarCoinApi.Core": "1.0.0-*",

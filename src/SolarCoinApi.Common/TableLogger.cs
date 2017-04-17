@@ -33,7 +33,7 @@ namespace SolarCoinApi.Common
             _verbose = verbose;
         }
 
-        
+
         private async Task Insert(string level, string component, string process, string context, string type, string stack,
             string msg, DateTime? dateTime)
         {
@@ -50,7 +50,9 @@ namespace SolarCoinApi.Common
 
         public Task WriteInfoAsync(string component, string process, string context, string info, DateTime? dateTime = null)
         {
-            return _verbose ? Insert("info", component, process, context, null, null, info, dateTime) : Task.CompletedTask;
+            return _verbose ?
+                Insert("info", component, process, context, null, null, info, dateTime)
+                : Task.CompletedTask;
         }
 
         public Task WriteWarningAsync(string component, string process, string context, string info, DateTime? dateTime = null)
@@ -60,33 +62,19 @@ namespace SolarCoinApi.Common
 
         public async Task WriteErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
-            try
-            {
-                await WriteErrorToSlack("SolarCoinApi: " + component);
-            }
-            catch (Exception e)
-            {
-                
-            }
+            await TryWriteErrorToSlack("SolarCoinApi: " + component);
             await Insert("error", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
         }
 
         public async Task WriteFatalErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
-            try
-            {
-                await WriteErrorToSlack("SolarCoinApi: " + component);
-            }
-            catch (Exception e)
-            {
-
-            }
+            await TryWriteErrorToSlack("SolarCoinApi: " + component);
             await Insert("fatalerror", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
         }
 
-        private Task WriteErrorToSlack(string component)
+        private Task TryWriteErrorToSlack(string component)
         {
-            return _notifier.Notify(new SlackMessage { Sender = component, Type = "Errors", Message = "Error happened, please see logs for details"});
+            return _notifier.Notify(new SlackMessage { Sender = component, Type = "Errors", Message = "Error happened, please see logs for details" });
         }
     }
 }
