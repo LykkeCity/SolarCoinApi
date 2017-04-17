@@ -35,9 +35,12 @@ namespace SolarCoinApi.Alerts
         {
             await _log.WriteInfoAsync(_componentName, "", "", "Cycle started");
 
-            var numTxes =
-                await _blockchainExplorer.CountAsync(Builders<TransactionMongoEntity>.Filter.Exists(
-                    d => d.WasProcessed, false));
+
+            var filterBuilder = Builders<TransactionMongoEntity>.Filter;
+            var txesFilter = filterBuilder.Eq(x => x.WasProcessed, false) | filterBuilder.Exists(x => x.WasProcessed, false);
+
+
+            var numTxes = await _blockchainExplorer.CountAsync(txesFilter);
 
             if (numTxes < 100)
             {

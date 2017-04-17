@@ -30,8 +30,11 @@ namespace SolarCoinApi.CashInGrabberJobRunner
         public async Task Execute()
         {
             await _log.WriteInfoAsync(_componentName, "", "", "Begining to process");
+
+            var filterBuilder = Builders<TransactionMongoEntity>.Filter;
+            var txesFilter = filterBuilder.Eq(x => x.WasProcessed, false) | filterBuilder.Exists(x => x.WasProcessed, false);
             
-            var newTxes = _blockchainExplorer.Find(Builders<TransactionMongoEntity>.Filter.Exists(d => d.WasProcessed, false))
+            var newTxes = _blockchainExplorer.Find(txesFilter)
               .Limit(_threshold)
               .ToList();
             
