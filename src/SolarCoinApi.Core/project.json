@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "Lykke.Common": "1.1.67",
+    "Lykke.Common": "1.1.69",
     "MongoDB.Driver": "2.4.3",
     "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "10.0.2",

@@ -19,7 +19,7 @@
     "SolarCoinApi.Common": "1.0.0-*",
     "SolarCoinApi.Core": "1.0-*",
     "SolarCoinApi.RpcJson": "1.0-*",
-    "Lykke.JobTriggers": "1.1.2"
+    "Lykke.JobTriggers": "1.1.3"
   },
 
   "frameworks": {
