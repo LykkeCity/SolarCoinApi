@@ -29,9 +29,9 @@ namespace SolarCoinApi.CashOutJobRunner
 #if DEBUG
                 var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
-                var settings = new AppSettings<CashOutSettings>().LoadFromEnvironment();
+                var settings = new AppSettings<CashOutSettings>().LoadFromWeb(Environment.GetEnvironmentVariable("SlrSettingsUrl")).Result;
 #endif
-                
+
                 ServiceProvider = new AutofacServiceProvider(Bootstrap.ConfigureBuilder(ComponentName, settings).Build());
                 
                 var rpcClient = ServiceProvider.GetService<IJsonRpcClient>();

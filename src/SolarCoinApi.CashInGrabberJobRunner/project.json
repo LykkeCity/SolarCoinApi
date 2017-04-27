@@ -29,5 +29,6 @@
         "portable-net45+win8"
       ]
     }
-  }
+  },
+  "userSecretsId": "aspnet-SolarCoinApi.CashInGrabberJobRunner-20170426082008"
 }

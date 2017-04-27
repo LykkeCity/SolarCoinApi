@@ -26,7 +26,7 @@ namespace SolarCoinApi.CashInGrabberJobRunner
 #if DEBUG
                 var settings = new AppSettings<CashInGrabberSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
-                var settings = new AppSettings<CashInGrabberSettings>().LoadFromEnvironment();
+                var settings =  new AppSettings<CashInGrabberSettings>().LoadFromWeb(Environment.GetEnvironmentVariable("SlrSettingsUrl")).Result;
 #endif
                 BsonClassMap.RegisterClassMap<TransactionMongoEntity>();
 

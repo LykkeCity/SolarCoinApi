@@ -105,7 +105,7 @@ namespace SolarCoinApi.Monitoring
             //var settings = new AppSettings<MonitoringSettings>().LoadFromEnvironment();
             var settings = new AppSettings<MonitoringSettings>().LoadFile("appsettings.Debug.json");
 #else
-            var settings = new AppSettings<MonitoringSettings>().LoadFromEnvironment();
+            var settings =  new AppSettings<MonitoringSettings>().LoadFromWeb(Environment.GetEnvironmentVariable("SlrSettingsUrl")).Result;
 #endif
 
 

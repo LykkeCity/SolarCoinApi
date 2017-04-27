@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.ComponentModel;
+using System.Net.Http;
 using AzureStorage.Blob;
 
 namespace SolarCoinApi.Common
@@ -26,12 +27,26 @@ namespace SolarCoinApi.Common
         }
 
         public T LoadFile(string filePath)
-        { 
+        {
 
             var txt = GetString(filePath);
             var fileNameWithExtension = Path.GetFileName(filePath);
 
             var settings = JsonConvert.DeserializeObject<T>(txt);
+
+            settings.Validate();
+
+            return settings;
+        }
+
+        public async Task<T> LoadFromWeb(string url)
+        {
+            var httpClient = new HttpClient { BaseAddress = new Uri(url) };
+            var settingsData = await httpClient.GetStringAsync("");
+
+            var settingsWeb = JsonConvert.DeserializeObject<WebSettings<T>>(settingsData);
+
+            var settings = settingsWeb.SolarCoinApi;
 
             settings.Validate();
 
@@ -50,7 +65,7 @@ namespace SolarCoinApi.Common
 
             return settings;
         }
-                
+
         public T LoadFromEnvironment()
         {
             var r = new T();
@@ -59,7 +74,7 @@ namespace SolarCoinApi.Common
 
             return r;
         }
-        
+
 
         private static void ReadPropertiesRecursive(object obj, Type type, List<string> prefixes)
         {
@@ -79,7 +94,7 @@ namespace SolarCoinApi.Common
                 else
                 {
                     var propertyFullName = prefixes != null && prefixes.Count > 0 ? $"{prefixes.Aggregate((i, j) => i + "." + j)}.{property.Name}" : property.Name;
-                    
+
                     Console.WriteLine(propertyFullName);
 
                     var val = Environment.GetEnvironmentVariable(propertyFullName);
@@ -91,9 +106,14 @@ namespace SolarCoinApi.Common
             }
         }
 
-            
+
     }
 
+
+    public class WebSettings<T>
+    {
+        public T SolarCoinApi { set; get; }
+    }
 
     public class Aa
     {
@@ -110,7 +130,7 @@ namespace SolarCoinApi.Common
     {
         public string bb { set; get; }
         public decimal cc { set; get; }
-        public Ee EeName { set;get;}
+        public Ee EeName { set; get; }
     }
 
     public class Ee

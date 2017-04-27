@@ -15,6 +15,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
     public class Program
     {
         private static AutofacServiceProvider ServiceProvider { get; set; }
+
         private static TriggerHost TriggerHost { set; get; }
 
         private static string ComponentName = "SolarCoinApi.CashInHandler";
@@ -28,7 +29,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
 #if DEBUG
                 var settings = new AppSettings<CashInHandlerSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
-                var settings = new AppSettings<CashInHandlerSettings>().LoadFromEnvironment();
+                var settings = new AppSettings<CashInHandlerSettings>().LoadFromWeb(Environment.GetEnvironmentVariable("SlrSettingsUrl")).Result;
 #endif
 
                 ServiceProvider = new AutofacServiceProvider(Bootrsrap.ConfigureBuilder(ComponentName, settings).Build());
