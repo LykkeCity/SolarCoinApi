@@ -22,7 +22,8 @@ namespace SolarCoinApi.Common
             {
                 PartitionKey = Key,
                 RowKey = monitoring.ServiceName,
-                DateTime = monitoring.DateTime
+                DateTime = monitoring.DateTime,
+                Version = monitoring.Version
             };
         }
     }
