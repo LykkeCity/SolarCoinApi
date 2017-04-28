@@ -14,6 +14,7 @@ namespace SolarCoinApi.Common
 
         public DateTime DateTime { get; set; }
         public string ServiceName { get; set; }
+        public string Version { get; set; }
 
         public static MonitoringEntity Create(IMonitoring monitoring)
         {

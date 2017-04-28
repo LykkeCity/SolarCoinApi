@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Common.Log;
 
@@ -25,8 +26,9 @@ namespace SolarCoinApi.Common
 
         public virtual async Task Execute()
         {
+            var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
             await _log.WriteInfoAsync(_compoenentForLogging, "Monitoring", "", "preparing to write to table");
-            await _repository.SaveAsync(new Monitoring { DateTime = DateTime.UtcNow, ServiceName = _component });
+            await _repository.SaveAsync(new Monitoring { DateTime = DateTime.UtcNow, ServiceName = _component, Version = version });
             await _log.WriteInfoAsync(_compoenentForLogging, "Monitoring", "", "done writing to table");
         }
     }
