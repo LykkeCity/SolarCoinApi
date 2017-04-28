@@ -62,7 +62,7 @@ namespace SolarCoinApi.Facade
 #if DEBUG
             var settings = new AppSettings<FacadeSettings>().LoadFile("appsettings.Debug.json");
 #else
-            var settings = new AppSettings<FacadeSettings>().Environment.GetEnvironmentVariable("SlrSettingsUrl")
+            var settings = new AppSettings<FacadeSettings>().LoadFromWeb(Environment.GetEnvironmentVariable("SlrSettingsUrl")).Result;
 #endif
 
 
