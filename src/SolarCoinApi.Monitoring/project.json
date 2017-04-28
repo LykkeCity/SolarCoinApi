@@ -32,6 +32,7 @@
     "include": [
       "appsettings.Release.json",
       "generalsettings.json",
+      "web.config",
       "Dockerfile"
     ]
   },
