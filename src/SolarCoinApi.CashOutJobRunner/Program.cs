@@ -30,6 +30,7 @@ namespace SolarCoinApi.CashOutJobRunner
                 var settings = new AppSettings<CashOutSettings>().LoadFile("appsettings.Debug.json");
 #elif RELEASE
                 var settings = new AppSettings<CashOutSettings>().LoadFromWeb(Environment.GetEnvironmentVariable("SlrSettingsUrl")).Result;
+                settings.HotWalletPrivKey = Environment.GetEnvironmentVariable("HotWalletPrivateKey");
 #endif
 
                 ServiceProvider = new AutofacServiceProvider(Bootstrap.ConfigureBuilder(ComponentName, settings).Build());

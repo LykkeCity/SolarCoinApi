@@ -37,10 +37,10 @@ namespace SolarCoinApi.CashOutJobRunner
             if (Rpc == null)
                 throw new Exception("Rpc section should be present");
 
-
+            /*
             if (string.IsNullOrWhiteSpace(HotWalletPrivKey))
                 throw new Exception("Hot Wallet Private Key should be present");
-
+                */
             if (string.IsNullOrWhiteSpace(Logger.ConnectionString))
                 throw new Exception("Logger Connection String should be present");
             if (string.IsNullOrWhiteSpace(Logger.ErrorTableName))
