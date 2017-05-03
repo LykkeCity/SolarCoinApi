@@ -62,19 +62,19 @@ namespace SolarCoinApi.Common
 
         public async Task WriteErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
-            await TryWriteErrorToSlack("SolarCoinApi: " + component);
+            await TryWriteErrorToSlack("SolarCoinApi: " + component, type.Message);
             await Insert("error", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
         }
 
         public async Task WriteFatalErrorAsync(string component, string process, string context, Exception type, DateTime? dateTime = null)
         {
-            await TryWriteErrorToSlack("SolarCoinApi: " + component);
+            await TryWriteErrorToSlack("SolarCoinApi: " + component, type.Message);
             await Insert("fatalerror", component, process, context, type.GetType().ToString(), type.StackTrace, type.Message, dateTime);
         }
 
-        private Task TryWriteErrorToSlack(string component)
+        private Task TryWriteErrorToSlack(string component, string message)
         {
-            return _notifier.Notify(new SlackMessage { Sender = component, Type = "Errors", Message = "Error happened, please see logs for details" });
+            return _notifier.Notify(new SlackMessage { Sender = component, Type = "Errors", Message = message });
         }
     }
 }
