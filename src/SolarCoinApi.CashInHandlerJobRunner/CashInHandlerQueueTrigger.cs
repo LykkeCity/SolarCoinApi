@@ -9,6 +9,7 @@ using AzureStorage;
 using AzureStorage.Queue;
 using Common.Log;
 using Lykke.JobTriggers.Triggers.Attributes;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace SolarCoinApi.CashInHandlerJobRunner
 {
@@ -52,7 +53,7 @@ namespace SolarCoinApi.CashInHandlerJobRunner
                 {
                     var vout = message.Vouts[i];
 
-                    if (_generatedWallets.Any(x => x.Address == vout.Address))
+                    if (await _generatedWallets.GetDataAsync("part", vout.Address) != null)
                     {
                         ourVouts.Add(new VoutEx { Address = vout.Address, Amount = vout.Amount, voutId = i });
                     }
