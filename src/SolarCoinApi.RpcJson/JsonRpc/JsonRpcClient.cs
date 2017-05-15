@@ -74,51 +74,52 @@ namespace SolarCoinApi.RpcJson.JsonRpc
         private IJsonRpcRequestBuilder _requestBuilder;
         private IOptions<RpcWalletGeneratorOptions> _options;
         private ILog _logger;
+        private HttpClient _httpClient;
 
         public JsonRpcClientRaw(IJsonRpcRequestBuilder requestBuilder, ILog logger, IOptions<RpcWalletGeneratorOptions> options)
         {
             _requestBuilder = requestBuilder;
             _options = options;
             _logger = logger;
-        }
-        public async Task<string> Invoke(string method, params object[] args)
-        {
+
             var credentials = new NetworkCredential(_options.Value.Username, _options.Value.Password);
             var handler = new HttpClientHandler { Credentials = credentials };
 
-            using (HttpClient client = new HttpClient(handler))
+            _httpClient = new HttpClient(handler);
+        }
+        public async Task<string> Invoke(string method, params object[] args)
+        {
+
+            var req = _requestBuilder.BuildJson(method, args);
+
+            //await _logger.WriteInfoAsync("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
+            await _logger.WriteInfoAsync("JsonRpcClientRaw", "", method, "Posting to RPC");
+
+
+            using (
+                HttpResponseMessage response =
+                    await
+                        _httpClient.PostAsync(_options.Value.Endpoint,
+                            new StringContent(req, Encoding.UTF8,
+                                "application/json"))
+            )
+            using (HttpContent content = response.Content)
             {
-                var req = _requestBuilder.BuildJson(method, args);
-
-                //await _logger.WriteInfoAsync("JsonRpcClientRaw", "Posting to RPC", "", $"{req}");
-                await _logger.WriteInfoAsync("JsonRpcClientRaw", "", method, "Posting to RPC");
-
-
-                using (
-                    HttpResponseMessage response =
-                        await
-                            client.PostAsync(_options.Value.Endpoint,
-                                new StringContent(req, Encoding.UTF8,
-                                    "application/json"))
-                )
-                using (HttpContent content = response.Content)
+                if (response.StatusCode != HttpStatusCode.OK &&
+                    response.StatusCode != HttpStatusCode.InternalServerError)
                 {
-                    if (response.StatusCode != HttpStatusCode.OK &&
-                        response.StatusCode != HttpStatusCode.InternalServerError)
-                    {
-                        Console.Write(response.StatusCode);
-                        throw new Exception(
-                            $"Request to RPC on '{_options.Value.Endpoint}' with username '{_options.Value.Username}' and password '{_options.Value.Password}' ended up with Status '{response.StatusCode}'");
+                    Console.Write(response.StatusCode);
+                    throw new Exception(
+                        $"Request to RPC on '{_options.Value.Endpoint}' with username '{_options.Value.Username}' and password '{_options.Value.Password}' ended up with Status '{response.StatusCode}'");
 
-                    }
+                }
 
-                    string result = await content.ReadAsStringAsync();
+                string result = await content.ReadAsStringAsync();
 
-                    //Console.WriteLine("RESULT::: " + result);
-                    if (!string.IsNullOrEmpty(result))
-                    {
-                        return result;
-                    }
+                //Console.WriteLine("RESULT::: " + result);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    return result;
                 }
             }
 
@@ -276,9 +277,9 @@ namespace SolarCoinApi.RpcJson.JsonRpc
 
     public class ImportPrivateKeyResponseModel
     {
-        
+
     }
-    
+
     public class ListTransactionsItemResponseModel
     {
         public string Account { set; get; }
